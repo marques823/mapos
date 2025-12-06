@@ -59,34 +59,62 @@
     
     /* Esconder botões dentro de hide-mobile-col em mobile */
     .hide-mobile-col,
-    .hide-mobile-col *,
     td.hide-mobile-col,
-    td.hide-mobile-col *,
-    span.hide-mobile-col,
-    span.hide-mobile-col * {
+    th.hide-mobile-col,
+    span.hide-mobile-col {
+      display: none !important;
+    }
+    
+    /* Esconder todos os elementos dentro de hide-mobile-col */
+    .hide-mobile-col a,
+    .hide-mobile-col button,
+    .hide-mobile-col span,
+    td.hide-mobile-col a,
+    td.hide-mobile-col button,
+    td.hide-mobile-col span,
+    span.hide-mobile-col a,
+    span.hide-mobile-col button,
+    span.hide-mobile-col span {
       display: none !important;
     }
     
     @media (min-width: 768px) {
       .hide-mobile-col,
-      .hide-mobile-col *,
       td.hide-mobile-col,
-      td.hide-mobile-col *,
-      span.hide-mobile-col,
-      span.hide-mobile-col * {
-        display: revert !important;
+      th.hide-mobile-col,
+      span.hide-mobile-col {
+        display: table-cell !important;
+      }
+      
+      .hide-mobile-col a,
+      .hide-mobile-col button,
+      .hide-mobile-col span,
+      td.hide-mobile-col a,
+      td.hide-mobile-col button,
+      td.hide-mobile-col span,
+      span.hide-mobile-col a,
+      span.hide-mobile-col button,
+      span.hide-mobile-col span {
+        display: inline-block !important;
       }
     }
     
     /* Quebra de linha na coluna Cliente */
-    .table.table-bordered tbody td.cli1,
-    .table.table-bordered tbody td.cli1 a {
+    .table.table-bordered tbody td.cli1 {
       word-wrap: break-word !important;
       word-break: break-word !important;
       white-space: normal !important;
       overflow-wrap: break-word !important;
       max-width: 150px !important;
-      display: block !important;
+    }
+    
+    .table.table-bordered tbody td.cli1 a {
+      word-wrap: break-word !important;
+      word-break: break-word !important;
+      white-space: normal !important;
+      overflow-wrap: break-word !important;
+      display: inline-block !important;
+      max-width: 100% !important;
     }
     
     /* Melhorar select de status */
