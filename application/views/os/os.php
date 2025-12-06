@@ -165,21 +165,43 @@
     }
     
     /* Padronizar botões Nova OS e Filtros */
+    .button-group-mobile {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+    }
+    
     .button-group-mobile .button,
     .button-group-mobile .btn,
-    .button-group-mobile button {
-      min-height: 44px !important;
-      height: 44px !important;
-      padding: 10px 16px !important;
+    .button-group-mobile button,
+    .button-group-mobile a {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      max-height: 38px !important;
+      padding: 8px 12px !important;
       font-size: 14px !important;
       border-radius: 4px !important;
       font-weight: 500 !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
     }
     
     .button-group-mobile .button__icon,
     .button-group-mobile .button__text2 {
       display: inline-flex !important;
       align-items: center !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .button-group-mobile .button__text2 {
+      margin-left: 4px !important;
     }
     
     /* Melhorar select de status */
@@ -208,10 +230,10 @@
                     <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="max-width: 160px">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Ordem de Serviço</span></a>
                 </div>
-                <div class="show-mobile button-group-mobile" style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+                <div class="show-mobile button-group-mobile" style="display: flex; gap: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
+                    <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="flex: 1 1 0; min-width: 0; height: 38px; display: flex; align-items: center; justify-content: center; padding: 8px 12px; box-sizing: border-box;">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Nova OS</span></a>
-                    <button type="button" class="button btn btn-mini btn-info" id="btnToggleFiltros" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+                    <button type="button" class="button btn btn-mini btn-info" id="btnToggleFiltros" style="flex: 1 1 0; min-width: 0; height: 38px; display: flex; align-items: center; justify-content: center; padding: 8px 12px; box-sizing: border-box;">
                         <span class="button__icon"><i class='bx bx-filter'></i></span><span class="button__text2">Filtros</span>
                     </button>
                 </div>
