@@ -76,10 +76,10 @@
                                         <h3>N° OS: <?php echo $result->idOs; ?></h3>
                                         <div class="span6" style="margin-left: 0">
                                             <label for="cliente">Cliente<span class="required">*</span></label>
-                                            <div style="display: flex; gap: 5px; align-items: flex-start;">
-                                                <input id="cliente" class="span10" type="text" name="cliente" value="<?php echo $result->nomeCliente ?>" style="margin-right: 5px;" />
+                                            <div class="input-group-mobile" style="display: flex; gap: 5px; align-items: flex-start;">
+                                                <input id="cliente" class="span10" type="text" name="cliente" value="<?php echo $result->nomeCliente ?>" style="margin-right: 5px;" autocomplete="off" />
                                                 <button type="button" class="btn btn-mini btn-success" id="btnCadastrarClienteRapido" title="Cadastrar Cliente Rápido" style="white-space: nowrap; margin-top: 0;">
-                                                    <i class="icon-plus"></i> Novo
+                                                    <i class="icon-plus"></i> <span class="hide-mobile-text">Novo</span>
                                                 </button>
                                             </div>
                                             <input id="clientes_id" class="span12" type="hidden" name="clientes_id" value="<?php echo $result->clientes_id ?>" />
@@ -108,15 +108,15 @@
                                         </div>
                                         <div class="span3">
                                             <label for="dataInicial">Data Inicial<span class="required">*</span></label>
-                                            <input id="dataInicial" autocomplete="off" class="span12 datepicker" type="text" name="dataInicial" value="<?php echo date('d/m/Y', strtotime($result->dataInicial)); ?>" />
+                                            <input id="dataInicial" autocomplete="off" class="span12 datepicker" type="text" name="dataInicial" value="<?php echo date('d/m/Y', strtotime($result->dataInicial)); ?>" inputmode="numeric" />
                                         </div>
                                         <div class="span3">
                                             <label for="dataFinal">Data Final<span class="required">*</span></label>
-                                            <input id="dataFinal" autocomplete="off" class="span12 datepicker" type="text" name="dataFinal" value="<?php echo date('d/m/Y', strtotime($result->dataFinal)); ?>" />
+                                            <input id="dataFinal" autocomplete="off" class="span12 datepicker" type="text" name="dataFinal" value="<?php echo date('d/m/Y', strtotime($result->dataFinal)); ?>" inputmode="numeric" />
                                         </div>
                                         <div class="span3">
                                             <label for="garantia">Garantia (dias)</label>
-                                            <input id="garantia" type="number" placeholder="Status s/g inserir nº/0" min="0" max="9999" class="span12" name="garantia" value="<?php echo $result->garantia ?>" />
+                                            <input id="garantia" type="number" placeholder="Status s/g inserir nº/0" min="0" max="9999" class="span12" name="garantia" value="<?php echo $result->garantia ?>" inputmode="numeric" />
                                             <?php echo form_error('garantia'); ?>
                                             <label for="termoGarantia">Termo Garantia</label>
                                             <input id="termoGarantia" class="span12" type="text" name="termoGarantia" value="<?php echo $result->refGarantia ?>" />
@@ -144,9 +144,9 @@
                                         <textarea class="span12 editor" name="laudoTecnico" id="laudoTecnico" cols="30" rows="5"><?php echo $result->laudoTecnico ?></textarea>
                                     </div>
                                     <div class="span12" style="padding: 0; margin-left: 0">
-                                        <div class="span12" style="display:flex; justify-content: center;">
-                                            <button class="button btn btn-primary" id="btnContinuar"><span class="button__icon"><i class="bx bx-sync"></i></span><span class="button__text2">Atualizar</span></button>
-                                            <a href="<?php echo base_url() ?>index.php/os" class="button btn btn-mini btn-warning"><span class="button__icon"><i class="bx bx-undo"></i></span> <span class="button__text2">Voltar</span></a>
+                                        <div class="span12 button-group-mobile" style="display:flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                                            <button class="button btn btn-primary" id="btnContinuar" style="flex: 1; min-width: 120px;"><span class="button__icon"><i class="bx bx-sync"></i></span><span class="button__text2">Atualizar</span></button>
+                                            <a href="<?php echo base_url() ?>index.php/os" class="button btn btn-mini btn-warning" style="flex: 1; min-width: 120px;"><span class="button__icon"><i class="bx bx-undo"></i></span> <span class="button__text2">Voltar</span></a>
                                         </div>
                                     </div>
                                 </form>
@@ -624,7 +624,7 @@
             <div class="span12" style="margin-left: 0">
                 <div class="span4" style="margin-left: 0">
                     <label for="vencimento">Data Entrada*</label>
-                    <input class="span12 datepicker" autocomplete="off" id="vencimento" type="text" name="vencimento" />
+                    <input class="span12 datepicker" autocomplete="off" id="vencimento" type="text" name="vencimento" inputmode="numeric" />
                 </div>
             </div>
             <div class="span12" style="margin-left: 0">
@@ -636,7 +636,7 @@
                     <div class="span6">
                         <label for="recebimento">Data Recebimento</label>
                         <input class="span12 datepicker" autocomplete="off" id="recebimento" type="text"
-                            name="recebimento" />
+                            name="recebimento" inputmode="numeric" />
                     </div>
                     <div class="span6">
                         <label for="formaPgto">Forma Pgto</label>
@@ -1512,7 +1512,28 @@
         });
 
         $(".datepicker").datepicker({
-            dateFormat: 'dd/mm/yy'
+            dateFormat: 'dd/mm/yy',
+            beforeShow: function(input, inst) {
+                // Ajustar posicionamento do datepicker em mobile
+                setTimeout(function() {
+                    var $datepicker = $('#ui-datepicker-div');
+                    if ($datepicker.length) {
+                        var windowWidth = $(window).width();
+                        if (windowWidth < 768) {
+                            // Em mobile, centralizar o datepicker
+                            $datepicker.css({
+                                'position': 'fixed',
+                                'top': '50%',
+                                'left': '50%',
+                                'transform': 'translate(-50%, -50%)',
+                                'width': '90%',
+                                'max-width': '320px',
+                                'z-index': '99999'
+                            });
+                        }
+                    }
+                }, 10);
+            }
         });
 
         $('.editor').trumbowyg({
@@ -1638,11 +1659,11 @@
             <div class="span12" style="padding: 1%; margin-left: 0;">
                 <div class="span6">
                     <label for="telefoneRapido">Telefone</label>
-                    <input id="telefoneRapido" class="span12" type="text" name="telefone" />
+                    <input id="telefoneRapido" class="span12" type="tel" name="telefone" inputmode="tel" />
                 </div>
                 <div class="span6">
                     <label for="celularRapido">Celular</label>
-                    <input id="celularRapido" class="span12" type="text" name="celular" />
+                    <input id="celularRapido" class="span12" type="tel" name="celular" inputmode="tel" />
                 </div>
             </div>
             <div class="span12" style="padding: 1%; margin-left: 0;">
@@ -1658,7 +1679,7 @@
                 </div>
                 <div class="span4">
                     <label for="numeroRapido">Número</label>
-                    <input id="numeroRapido" class="span12" type="text" name="numero" />
+                    <input id="numeroRapido" class="span12" type="text" name="numero" inputmode="numeric" />
                 </div>
             </div>
             <div class="span12" style="padding: 1%; margin-left: 0;">
@@ -1676,7 +1697,7 @@
                 </div>
                 <div class="span2">
                     <label for="cepRapido">CEP</label>
-                    <input id="cepRapido" class="span12" type="text" name="cep" />
+                    <input id="cepRapido" class="span12" type="text" name="cep" inputmode="numeric" />
                 </div>
             </div>
             <div class="span12" style="padding: 1%; margin-left: 0;">
