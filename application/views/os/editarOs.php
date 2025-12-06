@@ -1519,15 +1519,95 @@
                     if ($datepicker.length) {
                         var windowWidth = $(window).width();
                         if (windowWidth < 768) {
+                            // Calcular tamanho dinâmico baseado na largura da tela
+                            // Deixar 20px de margem de cada lado (40px total)
+                            var availableWidth = windowWidth - 40;
+                            // Limitar entre 200px e 90% da tela
+                            var maxWidth = Math.min(availableWidth, Math.max(200, windowWidth * 0.9));
+                            
+                            // Calcular tamanho de cada célula (7 colunas + espaçamento)
+                            var cellWidth = Math.floor((maxWidth - 20) / 7); // -20 para padding e bordas
+                            var cellHeight = Math.max(20, Math.floor(cellWidth * 0.9)); // Altura proporcional
+                            
+                            // Calcular font-size proporcional
+                            var baseFontSize = Math.max(8, Math.floor(cellWidth / 3));
+                            
                             // Em mobile, centralizar o datepicker
                             $datepicker.css({
                                 'position': 'fixed',
                                 'top': '50%',
                                 'left': '50%',
                                 'transform': 'translate(-50%, -50%)',
-                                'width': '90%',
-                                'max-width': '320px',
-                                'z-index': '99999'
+                                'width': maxWidth + 'px',
+                                'max-width': maxWidth + 'px',
+                                'z-index': '99999',
+                                'font-size': baseFontSize + 'px',
+                                'padding': '5px',
+                                'box-sizing': 'border-box',
+                                'margin': '0'
+                            });
+                            
+                            // Ajustar header do datepicker
+                            $datepicker.find('.ui-datepicker-header').css({
+                                'padding': '4px 6px',
+                                'font-size': (baseFontSize + 1) + 'px',
+                                'margin-bottom': '3px'
+                            });
+                            
+                            // Ajustar botões prev/next
+                            var btnSize = Math.max(20, Math.floor(cellWidth * 0.8));
+                            $datepicker.find('.ui-datepicker-prev, .ui-datepicker-next').css({
+                                'width': btnSize + 'px',
+                                'height': btnSize + 'px',
+                                'top': '4px',
+                                'font-size': (baseFontSize - 1) + 'px'
+                            });
+                            
+                            // Ajustar título
+                            $datepicker.find('.ui-datepicker-title').css({
+                                'font-size': (baseFontSize + 1) + 'px',
+                                'margin': '0',
+                                'line-height': '1.2'
+                            });
+                            
+                            // Ajustar tabela do calendário
+                            $datepicker.find('table.ui-datepicker-calendar').css({
+                                'border-spacing': '1px',
+                                'margin': '0 auto',
+                                'table-layout': 'fixed',
+                                'width': '100%'
+                            });
+                            
+                            // Ajustar células do calendário
+                            $datepicker.find('table.ui-datepicker-calendar td, table.ui-datepicker-calendar th').css({
+                                'padding': '0',
+                                'font-size': baseFontSize + 'px',
+                                'width': cellWidth + 'px',
+                                'height': cellHeight + 'px',
+                                'text-align': 'center'
+                            });
+                            
+                            // Ajustar links das células
+                            $datepicker.find('table.ui-datepicker-calendar td a').css({
+                                'padding': '0',
+                                'min-height': cellHeight + 'px',
+                                'max-height': cellHeight + 'px',
+                                'height': cellHeight + 'px',
+                                'width': '100%',
+                                'font-size': baseFontSize + 'px',
+                                'line-height': cellHeight + 'px',
+                                'box-sizing': 'border-box',
+                                'display': 'block',
+                                'text-align': 'center'
+                            });
+                            
+                            // Ajustar cabeçalhos das colunas
+                            $datepicker.find('table.ui-datepicker-calendar th').css({
+                                'font-size': baseFontSize + 'px',
+                                'font-weight': 'bold',
+                                'padding': '2px 0',
+                                'height': Math.floor(cellHeight * 0.7) + 'px',
+                                'line-height': Math.floor(cellHeight * 0.7) + 'px'
                             });
                         }
                     }

@@ -567,33 +567,66 @@ input[type="checkbox"], input[type="radio"], label {
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        width: 90% !important;
-        max-width: 320px !important;
+        width: 80% !important;
+        max-width: 220px !important;
         z-index: 99999 !important;
-        font-size: 14px !important;
+        font-size: 11px !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        padding: 5px !important;
+        box-sizing: border-box !important;
     }
     
     .ui-datepicker-header {
-        padding: 10px !important;
+        padding: 5px 8px !important;
+        font-size: 12px !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .ui-datepicker-title {
+        font-size: 12px !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+    
+    .ui-datepicker-prev,
+    .ui-datepicker-next {
+        width: 24px !important;
+        height: 24px !important;
+        top: 5px !important;
+        font-size: 10px !important;
     }
     
     .ui-datepicker-calendar {
         width: 100% !important;
+        margin: 0 !important;
+        border-spacing: 1px !important;
+        table-layout: fixed !important;
     }
     
     .ui-datepicker-calendar td,
     .ui-datepicker-calendar th {
-        padding: 8px 4px !important;
-        font-size: 13px !important;
+        padding: 1px !important;
+        font-size: 9px !important;
+        width: auto !important;
     }
     
     .ui-datepicker-calendar td a {
-        padding: 8px !important;
-        min-height: 36px !important;
+        padding: 2px 1px !important;
+        min-height: 22px !important;
+        max-height: 22px !important;
+        height: 22px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        font-size: 9px !important;
+        line-height: 1 !important;
+        box-sizing: border-box !important;
+    }
+    
+    .ui-datepicker-calendar th {
+        font-size: 9px !important;
+        font-weight: bold !important;
+        padding: 3px 1px !important;
     }
     
     /* Datepicker do Bootstrap (se usado) */
@@ -602,19 +635,43 @@ input[type="checkbox"], input[type="radio"], label {
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        width: 90% !important;
-        max-width: 320px !important;
+        width: 80% !important;
+        max-width: 220px !important;
         z-index: 99999 !important;
+        font-size: 11px !important;
+        padding: 5px !important;
+        box-sizing: border-box !important;
     }
     
     .datepicker table {
         width: 100% !important;
+        margin: 0 !important;
+        border-spacing: 1px !important;
+        table-layout: fixed !important;
     }
     
     .datepicker td,
     .datepicker th {
-        padding: 8px 4px !important;
-        font-size: 13px !important;
+        padding: 1px !important;
+        font-size: 9px !important;
+    }
+    
+    .datepicker td a {
+        padding: 2px 1px !important;
+        min-height: 22px !important;
+        max-height: 22px !important;
+        height: 22px !important;
+        font-size: 9px !important;
+        line-height: 1 !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Labels sempre visíveis em mobile */
+    label {
+        display: block !important;
+        margin-bottom: 5px !important;
+        font-weight: 500 !important;
+        font-size: 14px !important;
     }
 }
 

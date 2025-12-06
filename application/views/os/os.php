@@ -98,12 +98,6 @@
       display: block !important;
     }
     
-    @media (min-width: 768px) {
-      #formFiltros.hide-mobile-form {
-        display: block !important;
-      }
-    }
-    
     /* Esconder botões dentro de hide-mobile-col em mobile */
     .hide-mobile-col,
     td.hide-mobile-col,
@@ -124,96 +118,104 @@
     span.hide-mobile-col span {
       display: none !important;
     }
-    
-    @media (min-width: 768px) {
-      .hide-mobile-col,
-      td.hide-mobile-col,
-      th.hide-mobile-col,
-      span.hide-mobile-col {
-        display: table-cell !important;
-      }
-      
-      .hide-mobile-col a,
-      .hide-mobile-col button,
-      .hide-mobile-col span,
-      td.hide-mobile-col a,
-      td.hide-mobile-col button,
-      td.hide-mobile-col span,
-      span.hide-mobile-col a,
-      span.hide-mobile-col button,
-      span.hide-mobile-col span {
-        display: inline-block !important;
-      }
+  }
+  
+  /* Regras para desktop (fora do bloco mobile) */
+  @media (min-width: 768px) {
+    /* Mostrar filtros no desktop */
+    #formFiltros.hide-mobile-form {
+      display: block !important;
     }
     
-    /* Quebra de linha na coluna Cliente */
-    .table.table-bordered tbody td.cli1 {
-      word-wrap: break-word !important;
-      word-break: break-word !important;
-      white-space: normal !important;
-      overflow-wrap: break-word !important;
+    /* Mostrar colunas escondidas no desktop */
+    .hide-mobile-col,
+    td.hide-mobile-col,
+    th.hide-mobile-col,
+    span.hide-mobile-col {
+      display: table-cell !important;
     }
     
-    .table.table-bordered tbody td.cli1 a {
-      word-wrap: break-word !important;
-      word-break: break-word !important;
-      white-space: normal !important;
-      overflow-wrap: break-word !important;
+    .hide-mobile-col a,
+    .hide-mobile-col button,
+    .hide-mobile-col span,
+    td.hide-mobile-col a,
+    td.hide-mobile-col button,
+    td.hide-mobile-col span,
+    span.hide-mobile-col a,
+    span.hide-mobile-col button,
+    span.hide-mobile-col span {
       display: inline-block !important;
-      max-width: 100% !important;
-      line-height: 1.4 !important;
     }
-    
-    /* Padronizar botões Nova OS e Filtros */
-    .button-group-mobile {
-      width: 100% !important;
-      box-sizing: border-box !important;
-      max-width: 100% !important;
-    }
-    
-    .button-group-mobile .button,
-    .button-group-mobile .btn,
-    .button-group-mobile button,
-    .button-group-mobile a {
-      flex: 1 1 0 !important;
-      min-width: 0 !important;
-      height: 38px !important;
-      min-height: 38px !important;
-      max-height: 38px !important;
-      padding: 8px 12px !important;
-      font-size: 14px !important;
-      border-radius: 4px !important;
-      font-weight: 500 !important;
-      box-sizing: border-box !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-    }
-    
-    .button-group-mobile .button__icon,
-    .button-group-mobile .button__text2 {
-      display: inline-flex !important;
-      align-items: center !important;
-      flex-shrink: 0 !important;
-    }
-    
-    .button-group-mobile .button__text2 {
-      margin-left: 4px !important;
-    }
-    
-    /* Melhorar select de status */
-    select.span12 {
-      font-size: 16px !important;
-      padding: 8px 12px !important;
-      height: auto !important;
-      min-height: 38px !important;
-      -webkit-appearance: menulist !important;
-      -moz-appearance: menulist !important;
-      appearance: menulist !important;
-    }
+  }
+  
+  /* Regras gerais (aplicam-se em todos os tamanhos de tela) */
+  /* Quebra de linha na coluna Cliente */
+  .table.table-bordered tbody td.cli1 {
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+  
+  .table.table-bordered tbody td.cli1 a {
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    display: inline-block !important;
+    max-width: 100% !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Padronizar botões Nova OS e Filtros */
+  .button-group-mobile {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+  
+  .button-group-mobile .button,
+  .button-group-mobile .btn,
+  .button-group-mobile button,
+  .button-group-mobile a {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  .button-group-mobile .button__icon,
+  .button-group-mobile .button__text2 {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .button-group-mobile .button__text2 {
+    margin-left: 4px !important;
+  }
+  
+  /* Melhorar select de status */
+  select.span12 {
+    font-size: 16px !important;
+    padding: 8px 12px !important;
+    height: auto !important;
+    min-height: 38px !important;
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    appearance: menulist !important;
   }
 </style>
 <div class="new122">
@@ -245,7 +247,7 @@
                 </div>
             <?php } ?>
         </div>
-        <form method="get" action="<?php echo base_url(); ?>index.php/os/gerenciar" id="formFiltros" class="hide-mobile-form" style="display: none;">
+        <form method="get" action="<?php echo base_url(); ?>index.php/os/gerenciar" id="formFiltros" class="hide-mobile-form">
             <div class="span12" style="margin-left: 0; margin-bottom: 10px;">
                 <div class="span12" style="margin-left: 0;">
                     <input type="text" name="pesquisa" id="pesquisa" placeholder="Nome do cliente a pesquisar" class="span12" value="<?=set_value('pesquisa')?>" inputmode="text" style="font-size: 16px; padding: 8px 12px;">
@@ -269,10 +271,36 @@
             </div>
             <div class="span12" style="margin-left: 0; margin-bottom: 10px;">
                 <div class="span6" style="margin-left: 0;">
-                    <input type="text" name="data" autocomplete="off" id="data" placeholder="Data Inicial" class="span12 datepicker" value="<?=$this->input->get('data')?>" inputmode="numeric" style="font-size: 16px; padding: 8px 12px;">
+                    <label for="data" style="display: block; margin-bottom: 5px; font-weight: 500;">Data Inicial</label>
+                    <input type="date" name="data_native" id="data" class="span12" value="<?php 
+                        $dataGet = $this->input->get('data');
+                        if ($dataGet) {
+                            $parts = explode('/', $dataGet);
+                            if (count($parts) == 3) {
+                                $year = $parts[2];
+                                if (strlen($year) == 2) {
+                                    $year = '20' . $year;
+                                }
+                                echo $year . '-' . $parts[1] . '-' . $parts[0];
+                            }
+                        }
+                    ?>" style="font-size: 16px; padding: 8px 12px;">
                 </div>
                 <div class="span6">
-                    <input type="text" name="data2" autocomplete="off" id="data2" placeholder="Data Final" class="span12 datepicker" value="<?=$this->input->get('data2')?>" inputmode="numeric" style="font-size: 16px; padding: 8px 12px;">
+                    <label for="data2" style="display: block; margin-bottom: 5px; font-weight: 500;">Data Final</label>
+                    <input type="date" name="data2_native" id="data2" class="span12" value="<?php 
+                        $data2Get = $this->input->get('data2');
+                        if ($data2Get) {
+                            $parts = explode('/', $data2Get);
+                            if (count($parts) == 3) {
+                                $year = $parts[2];
+                                if (strlen($year) == 2) {
+                                    $year = '20' . $year;
+                                }
+                                echo $year . '-' . $parts[1] . '-' . $parts[0];
+                            }
+                        }
+                    ?>" style="font-size: 16px; padding: 8px 12px;">
                 </div>
             </div>
             <div class="span12" style="margin-left: 0;">
@@ -443,6 +471,39 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
+        // Função para converter data de YYYY-MM-DD para dd/mm/yy
+        function convertDateToFormat(dateStr) {
+            if (!dateStr) return '';
+            var parts = dateStr.split('-');
+            if (parts.length === 3) {
+                return parts[2] + '/' + parts[1] + '/' + parts[0].substring(2);
+            }
+            return dateStr;
+        }
+        
+        // Converter valores antes de enviar o formulário
+        $('#formFiltros').on('submit', function(e) {
+            // Converter data inicial
+            var data1 = $('#data').val();
+            if (data1) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'data',
+                    value: convertDateToFormat(data1)
+                }).appendTo(this);
+            }
+            
+            // Converter data final
+            var data2 = $('#data2').val();
+            if (data2) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'data2',
+                    value: convertDateToFormat(data2)
+                }).appendTo(this);
+            }
+        });
+        
         $(document).on('click', 'a', function(event) {
             var os = $(this).attr('os');
             $('#idOs').val(os);
@@ -471,44 +532,17 @@
                     }
                 });
         });
-        $(".datepicker").datepicker({
-            dateFormat: 'dd/mm/yy',
-            beforeShow: function(input, inst) {
-                // Ajustar posicionamento do datepicker em mobile
-                setTimeout(function() {
-                    var $datepicker = $('#ui-datepicker-div');
-                    if ($datepicker.length) {
-                        var windowWidth = $(window).width();
-                        if (windowWidth < 768) {
-                            $datepicker.css({
-                                'position': 'fixed',
-                                'top': '50%',
-                                'left': '50%',
-                                'transform': 'translate(-50%, -50%)',
-                                'width': '85%',
-                                'max-width': '280px',
-                                'z-index': '99999',
-                                'font-size': '12px'
-                            });
-                            // Ajustar células do calendário
-                            $datepicker.find('table.ui-datepicker-calendar td, table.ui-datepicker-calendar th').css({
-                                'padding': '4px',
-                                'font-size': '12px'
-                            });
-                            $datepicker.find('table.ui-datepicker-calendar td a').css({
-                                'padding': '6px',
-                                'min-height': '32px'
-                            });
-                        }
-                    }
-                }, 10);
-            }
-        });
         
         // Toggle filtros em mobile
         $('#btnToggleFiltros').on('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            
+            // Só funciona em mobile (largura < 768px)
+            if ($(window).width() >= 768) {
+                return;
+            }
+            
             var $form = $('#formFiltros');
             var isVisible = $form.is(':visible') || $form.css('display') !== 'none';
             
@@ -521,6 +555,13 @@
                 $form.css('display', 'block');
                 $form.hide().slideDown(300);
                 $(this).find('i').removeClass('bx-filter').addClass('bx-filter-alt');
+            }
+        });
+        
+        // Garantir que o formulário apareça no desktop ao redimensionar
+        $(window).on('resize', function() {
+            if ($(window).width() >= 768) {
+                $('#formFiltros').css('display', 'block');
             }
         });
     });
