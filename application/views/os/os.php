@@ -46,6 +46,21 @@
       text-align: center !important;
     }
     
+    /* Esconder todos os botões exceto Visualizar na coluna Ações em mobile */
+    .table.table-bordered tbody td:nth-child(12) .hide-mobile-col,
+    .table.table-bordered tbody td:nth-child(12) span.hide-mobile-col,
+    .table.table-bordered tbody td:nth-child(12) span.hide-mobile-col a,
+    .table.table-bordered tbody td:nth-child(12) span.hide-mobile-col button {
+      display: none !important;
+    }
+    
+    /* Garantir que apenas o botão Visualizar apareça */
+    .table.table-bordered tbody td:nth-child(12) .mobile-action-btn {
+      display: inline-block !important;
+      min-width: 44px !important;
+      min-height: 44px !important;
+    }
+    
     /* Garantir que filtros fiquem escondidos por padrão em mobile */
     #formFiltros.hide-mobile-form {
       display: none !important;
