@@ -15,17 +15,22 @@
             <h5>Ordens de Serviço</h5>
         </div>
     <div class="span12" style="margin-left: 0">
-        <form method="get" action="<?php echo base_url(); ?>index.php/os/gerenciar">
+        <div class="span12" style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
             <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aOs')) { ?>
-                <div class="span3">
+                <div>
                     <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="max-width: 160px">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Ordem de Serviço</span></a>
                 </div>
-            <?php
-            } ?>
-
+            <?php } ?>
+            <div class="show-mobile" style="flex: 1;">
+                <button type="button" class="button btn btn-mini btn-info" id="btnToggleFiltros" style="width: 100%;">
+                    <span class="button__icon"><i class='bx bx-filter'></i></span><span class="button__text2">Filtros</span>
+                </button>
+            </div>
+        </div>
+        <form method="get" action="<?php echo base_url(); ?>index.php/os/gerenciar" id="formFiltros" class="hide-mobile-form">
             <div class="span3">
-                <input type="text" name="pesquisa" id="pesquisa" placeholder="Nome do cliente a pesquisar" class="span12" value="<?=set_value('pesquisa')?>">
+                <input type="text" name="pesquisa" id="pesquisa" placeholder="Nome do cliente a pesquisar" class="span12" value="<?=set_value('pesquisa')?>" inputmode="text">
             </div>
             <div class="span2">
                 <select name="status" id="" class="span12">
@@ -40,12 +45,10 @@
                     <option value="Aguardando Peças" <?=$this->input->get('status') == 'Aguardando Peças' ? 'selected' : ''?>>Aguardando Peças</option>
                     <option value="Aprovado" <?=$this->input->get('status') == 'Aprovado' ? 'selected' : ''?>>Aprovado</option>
                 </select>
-
             </div>
-
             <div class="span3">
-                <input type="text" name="data" autocomplete="off" id="data" placeholder="Data Inicial" class="span6 datepicker" value="<?=$this->input->get('data')?>">
-                <input type="text" name="data2" autocomplete="off" id="data2" placeholder="Data Final" class="span6 datepicker" value="<?=$this->input->get('data2')?>">
+                <input type="text" name="data" autocomplete="off" id="data" placeholder="Data Inicial" class="span6 datepicker" value="<?=$this->input->get('data')?>" inputmode="numeric">
+                <input type="text" name="data2" autocomplete="off" id="data2" placeholder="Data Final" class="span6 datepicker" value="<?=$this->input->get('data2')?>" inputmode="numeric">
             </div>
             <div class="span1">
                 <button class="button btn btn-mini btn-warning" style="min-width: 30px">
@@ -60,16 +63,16 @@
                 <table class="table table-bordered ">
                     <thead>
                         <tr>
-                            <th>N°</th>
+                            <th class="hide-mobile-col">N°</th>
                             <th>Cliente</th>
-                            <th class="ph1">Responsável</th>
-                            <th>Data Inicial</th>
-                            <th class="ph2">Data Final</th>
-                            <th class="ph3">Venc. Garantia</th>
-                            <th>Valor Total</th>
-                            <th>Desconto</th>
-                            <th>Valor com Desconto</th>
-                            <th class="ph4">V.T (Faturado)</th>
+                            <th class="ph1 hide-mobile-col">Responsável</th>
+                            <th class="hide-mobile-col">Data Inicial</th>
+                            <th class="ph2 hide-mobile-col">Data Final</th>
+                            <th class="ph3 hide-mobile-col">Venc. Garantia</th>
+                            <th class="hide-mobile-col">Valor Total</th>
+                            <th class="hide-mobile-col">Desconto</th>
+                            <th class="hide-mobile-col">Valor com Desconto</th>
+                            <th class="ph4 hide-mobile-col">V.T (Faturado)</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
@@ -149,31 +152,39 @@
                                 }
 
                                 echo '<tr>';
-                                echo '<td>' . $r->idOs . '</td>';
+                                echo '<td class="hide-mobile-col">' . $r->idOs . '</td>';
                                 echo '<td class="cli1"><a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '" style="margin-right: 1%">' . $r->nomeCliente . '</a></td>';
-                                echo '<td class="ph1">' . $r->nome . '</td>';
-                                echo '<td>' . $dataInicial . '</td>';
-                                echo '<td class="ph2">' . $dataFinal . '</td>';
-                                echo '<td class="ph3"><span class="badge" style="background-color: ' . $corGarantia . '; border-color: ' . $corGarantia . '">' . $vencGarantia . '</span> </td>';
-                                echo '<td>R$ ' . number_format($r->totalProdutos + $r->totalServicos, 2, ',', '.') . '</td>';                                
-                                echo '<td>R$ ' . number_format(floatval($r->desconto), 2, ',', '.') . '</td>';
-                                echo '<td>R$ ' . number_format(floatval($r->valor_desconto), 2, ',', '.') . '</td>';
-                                echo '<td class="ph4">R$ ' . number_format($r->faturado ? floatval($r->valor_desconto) : 0.00, 2, ',', '.') . '</td>';
+                                echo '<td class="ph1 hide-mobile-col">' . $r->nome . '</td>';
+                                echo '<td class="hide-mobile-col">' . $dataInicial . '</td>';
+                                echo '<td class="ph2 hide-mobile-col">' . $dataFinal . '</td>';
+                                echo '<td class="ph3 hide-mobile-col"><span class="badge" style="background-color: ' . $corGarantia . '; border-color: ' . $corGarantia . '">' . $vencGarantia . '</span> </td>';
+                                echo '<td class="hide-mobile-col">R$ ' . number_format($r->totalProdutos + $r->totalServicos, 2, ',', '.') . '</td>';                                
+                                echo '<td class="hide-mobile-col">R$ ' . number_format(floatval($r->desconto), 2, ',', '.') . '</td>';
+                                echo '<td class="hide-mobile-col">R$ ' . number_format(floatval($r->valor_desconto), 2, ',', '.') . '</td>';
+                                echo '<td class="ph4 hide-mobile-col">R$ ' . number_format($r->faturado ? floatval($r->valor_desconto) : 0.00, 2, ',', '.') . '</td>';
                                 echo '<td><span class="badge" style="background-color: ' . $cor . '; border-color: ' . $cor . '">' . $r->status . '</span> </td>';
-                                echo '<td>';
+                                echo '<td class="mobile-actions">';
 
                                 $editavel = $this->os_model->isEditable($r->idOs);
 
+                                // Botão Visualizar (sempre visível em mobile)
                                 if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
-                                    echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/os/visualizar/' . $r->idOs . '" class="btn-nwe" title="Ver mais detalhes"><i class="bx bx-show"></i></a>';
+                                    echo '<a href="' . base_url() . 'index.php/os/visualizar/' . $r->idOs . '" class="btn-nwe mobile-action-btn" title="Ver mais detalhes"><i class="bx bx-show"></i><span class="hide-mobile-text"> Ver</span></a>';
+                                    // Outros botões escondidos em mobile
+                                    echo '<span class="hide-mobile-col">';
                                     echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/os/imprimir/' . $r->idOs . '" target="_blank" class="btn-nwe6" title="Imprimir A4"><i class="bx bx-printer bx-xs"></i></a>';
                                     echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/os/imprimirTermica/' . $r->idOs . '" target="_blank" class="btn-nwe6" title="Imprimir Não Fiscal"><i class="bx bx-printer bx-xs"></i></a>';
+                                    echo '</span>';
                                 }
                                 if ($editavel) {
+                                    echo '<span class="hide-mobile-col">';
                                     echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/os/editar/' . $r->idOs . '" class="btn-nwe3" title="Editar OS"><i class="bx bx-edit"></i></a>';
+                                    echo '</span>';
                                 }
                                 if ($this->permission->checkPermission($this->session->userdata('permissao'), 'dOs') && $editavel) {
+                                    echo '<span class="hide-mobile-col">';
                                     echo '<a href="#modal-excluir" role="button" data-toggle="modal" os="' . $r->idOs . '" class="btn-nwe4" title="Excluir OS"><i class="bx bx-trash-alt"></i></a>  ';
+                                    echo '</span>';
                                 }
                                 echo '</td>';
                                 echo '</tr>';
@@ -237,7 +248,38 @@
                 });
         });
         $(".datepicker").datepicker({
-            dateFormat: 'dd/mm/yy'
+            dateFormat: 'dd/mm/yy',
+            beforeShow: function(input, inst) {
+                // Ajustar posicionamento do datepicker em mobile
+                setTimeout(function() {
+                    var $datepicker = $('#ui-datepicker-div');
+                    if ($datepicker.length) {
+                        var windowWidth = $(window).width();
+                        if (windowWidth < 768) {
+                            $datepicker.css({
+                                'position': 'fixed',
+                                'top': '50%',
+                                'left': '50%',
+                                'transform': 'translate(-50%, -50%)',
+                                'width': '90%',
+                                'max-width': '320px',
+                                'z-index': '99999'
+                            });
+                        }
+                    }
+                }, 10);
+            }
+        });
+        
+        // Toggle filtros em mobile
+        $('#btnToggleFiltros').on('click', function() {
+            $('#formFiltros').slideToggle();
+            var icon = $(this).find('i');
+            if ($('#formFiltros').is(':visible')) {
+                icon.removeClass('bx-filter').addClass('bx-filter-alt');
+            } else {
+                icon.removeClass('bx-filter-alt').addClass('bx-filter');
+            }
         });
     });
 </script>
