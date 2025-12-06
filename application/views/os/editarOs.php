@@ -449,7 +449,6 @@
                         <!-- Fim tab anotações -->
                     </div>
                 </div>
-                &nbsp
             </div>
         </div>
     </div>
