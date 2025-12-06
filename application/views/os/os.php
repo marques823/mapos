@@ -66,6 +66,12 @@
       display: none !important;
     }
     
+    /* Quando o filtro está visível (após toggle) */
+    #formFiltros.hide-mobile-form[style*="display: block"],
+    #formFiltros.hide-mobile-form[style*="display:block"] {
+      display: block !important;
+    }
+    
     @media (min-width: 768px) {
       #formFiltros.hide-mobile-form {
         display: block !important;
@@ -434,13 +440,16 @@
             e.preventDefault();
             e.stopPropagation();
             var $form = $('#formFiltros');
-            var isVisible = $form.is(':visible');
+            var isVisible = $form.is(':visible') || $form.css('display') !== 'none';
             
             if (isVisible) {
-                $form.slideUp(300);
+                $form.slideUp(300, function() {
+                    $form.css('display', 'none');
+                });
                 $(this).find('i').removeClass('bx-filter-alt').addClass('bx-filter');
             } else {
-                $form.slideDown(300);
+                $form.css('display', 'block');
+                $form.hide().slideDown(300);
                 $(this).find('i').removeClass('bx-filter').addClass('bx-filter-alt');
             }
         });
