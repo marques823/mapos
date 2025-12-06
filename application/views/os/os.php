@@ -33,9 +33,6 @@
     .table.table-bordered thead th:nth-child(2),
     .table.table-bordered tbody td:nth-child(2) {
       width: 45% !important;
-      word-wrap: break-word !important;
-      word-break: break-word !important;
-      max-width: 150px !important;
     }
     
     .table.table-bordered thead th:nth-child(11),
@@ -60,6 +57,38 @@
       }
     }
     
+    /* Esconder botões dentro de hide-mobile-col em mobile */
+    .hide-mobile-col,
+    .hide-mobile-col *,
+    td.hide-mobile-col,
+    td.hide-mobile-col *,
+    span.hide-mobile-col,
+    span.hide-mobile-col * {
+      display: none !important;
+    }
+    
+    @media (min-width: 768px) {
+      .hide-mobile-col,
+      .hide-mobile-col *,
+      td.hide-mobile-col,
+      td.hide-mobile-col *,
+      span.hide-mobile-col,
+      span.hide-mobile-col * {
+        display: revert !important;
+      }
+    }
+    
+    /* Quebra de linha na coluna Cliente */
+    .table.table-bordered tbody td.cli1,
+    .table.table-bordered tbody td.cli1 a {
+      word-wrap: break-word !important;
+      word-break: break-word !important;
+      white-space: normal !important;
+      overflow-wrap: break-word !important;
+      max-width: 150px !important;
+      display: block !important;
+    }
+    
     /* Melhorar select de status */
     select.span12 {
       font-size: 16px !important;
@@ -82,13 +111,17 @@
     <div class="span12" style="margin-left: 0">
         <div class="span12" style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
             <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aOs')) { ?>
-                <div>
+                <div class="hide-mobile">
                     <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="max-width: 160px">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Ordem de Serviço</span></a>
                 </div>
+                <div class="show-mobile" style="flex: 1;">
+                    <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="width: 100%;">
+                        <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Nova OS</span></a>
+                </div>
             <?php } ?>
             <div class="show-mobile" style="flex: 1;">
-                <button type="button" class="button btn btn-mini btn-info" id="btnToggleFiltros" style="width: 100%;">
+                <button type="button" class="button btn btn-mini btn-info" id="btnToggleFiltros" style="width: 100%; min-height: 44px;">
                     <span class="button__icon"><i class='bx bx-filter'></i></span><span class="button__text2">Filtros</span>
                 </button>
             </div>
@@ -227,7 +260,7 @@
 
                                 echo '<tr>';
                                 echo '<td class="hide-mobile-col">' . $r->idOs . '</td>';
-                                echo '<td class="cli1" style="word-wrap: break-word; word-break: break-word; max-width: 150px;"><a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '" style="margin-right: 1%">' . $r->nomeCliente . '</a></td>';
+                                echo '<td class="cli1"><a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '">' . $r->nomeCliente . '</a></td>';
                                 echo '<td class="ph1 hide-mobile-col">' . $r->nome . '</td>';
                                 echo '<td class="hide-mobile-col">' . $dataInicial . '</td>';
                                 echo '<td class="ph2 hide-mobile-col">' . $dataFinal . '</td>';
