@@ -30,20 +30,46 @@
       display: none !important;
     }
     
+    /* Tabela dinâmica que se ajusta ao tamanho da tela */
+    .table-responsive {
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .table.table-bordered {
+      width: 100% !important;
+      table-layout: auto !important;
+      min-width: 100% !important;
+    }
+    
     .table.table-bordered thead th:nth-child(2),
     .table.table-bordered tbody td:nth-child(2) {
-      width: 45% !important;
+      width: auto !important;
+      min-width: 120px !important;
+      max-width: 45% !important;
     }
     
     .table.table-bordered thead th:nth-child(11),
     .table.table-bordered tbody td:nth-child(11) {
-      width: 30% !important;
+      width: auto !important;
+      min-width: 80px !important;
+      max-width: 30% !important;
     }
     
     .table.table-bordered thead th:nth-child(12),
     .table.table-bordered tbody td:nth-child(12) {
-      width: 25% !important;
+      width: auto !important;
+      min-width: 60px !important;
+      max-width: 25% !important;
       text-align: center !important;
+    }
+    
+    /* Ajustar padding das células em mobile */
+    .table.table-bordered thead th,
+    .table.table-bordered tbody td {
+      padding: 8px 6px !important;
+      font-size: 13px !important;
     }
     
     /* Esconder todos os botões exceto Visualizar na coluna Ações em mobile */
@@ -126,7 +152,6 @@
       word-break: break-word !important;
       white-space: normal !important;
       overflow-wrap: break-word !important;
-      max-width: 150px !important;
     }
     
     .table.table-bordered tbody td.cli1 a {
@@ -136,6 +161,25 @@
       overflow-wrap: break-word !important;
       display: inline-block !important;
       max-width: 100% !important;
+      line-height: 1.4 !important;
+    }
+    
+    /* Padronizar botões Nova OS e Filtros */
+    .button-group-mobile .button,
+    .button-group-mobile .btn,
+    .button-group-mobile button {
+      min-height: 44px !important;
+      height: 44px !important;
+      padding: 10px 16px !important;
+      font-size: 14px !important;
+      border-radius: 4px !important;
+      font-weight: 500 !important;
+    }
+    
+    .button-group-mobile .button__icon,
+    .button-group-mobile .button__text2 {
+      display: inline-flex !important;
+      align-items: center !important;
     }
     
     /* Melhorar select de status */
@@ -158,22 +202,26 @@
             <h5>Ordens de Serviço</h5>
         </div>
     <div class="span12" style="margin-left: 0">
-        <div class="span12" style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <div class="span12" style="margin-bottom: 10px;">
             <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aOs')) { ?>
                 <div class="hide-mobile">
                     <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="max-width: 160px">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Ordem de Serviço</span></a>
                 </div>
-                <div class="show-mobile" style="flex: 1;">
-                    <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="width: 100%;">
+                <div class="show-mobile button-group-mobile" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="button btn btn-mini btn-success" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center;">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Nova OS</span></a>
+                    <button type="button" class="button btn btn-mini btn-info" id="btnToggleFiltros" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <span class="button__icon"><i class='bx bx-filter'></i></span><span class="button__text2">Filtros</span>
+                    </button>
+                </div>
+            <?php } else { ?>
+                <div class="show-mobile" style="margin-bottom: 10px;">
+                    <button type="button" class="button btn btn-mini btn-info" id="btnToggleFiltros" style="width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <span class="button__icon"><i class='bx bx-filter'></i></span><span class="button__text2">Filtros</span>
+                    </button>
                 </div>
             <?php } ?>
-            <div class="show-mobile" style="flex: 1;">
-                <button type="button" class="button btn btn-mini btn-info" id="btnToggleFiltros" style="width: 100%; min-height: 44px;">
-                    <span class="button__icon"><i class='bx bx-filter'></i></span><span class="button__text2">Filtros</span>
-                </button>
-            </div>
         </div>
         <form method="get" action="<?php echo base_url(); ?>index.php/os/gerenciar" id="formFiltros" class="hide-mobile-form" style="display: none;">
             <div class="span12" style="margin-left: 0; margin-bottom: 10px;">
@@ -215,8 +263,8 @@
 
     <div class="widget-box" style="margin-top: 8px">
         <div class="widget-content nopadding">
-            <div class="table-responsive">
-                <table class="table table-bordered ">
+            <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%;">
+                <table class="table table-bordered" style="width: 100%; table-layout: auto;">
                     <thead>
                         <tr>
                             <th class="hide-mobile-col">N°</th>
