@@ -6,6 +6,45 @@
   select {
     width: 70px;
   }
+  
+  /* Esconder colunas em mobile - estilo inline para garantir */
+  @media (max-width: 767px) {
+    .table.table-bordered thead th:nth-child(1),
+    .table.table-bordered thead th:nth-child(3),
+    .table.table-bordered thead th:nth-child(4),
+    .table.table-bordered thead th:nth-child(5),
+    .table.table-bordered thead th:nth-child(6),
+    .table.table-bordered thead th:nth-child(7),
+    .table.table-bordered thead th:nth-child(8),
+    .table.table-bordered thead th:nth-child(9),
+    .table.table-bordered thead th:nth-child(10),
+    .table.table-bordered tbody td:nth-child(1),
+    .table.table-bordered tbody td:nth-child(3),
+    .table.table-bordered tbody td:nth-child(4),
+    .table.table-bordered tbody td:nth-child(5),
+    .table.table-bordered tbody td:nth-child(6),
+    .table.table-bordered tbody td:nth-child(7),
+    .table.table-bordered tbody td:nth-child(8),
+    .table.table-bordered tbody td:nth-child(9),
+    .table.table-bordered tbody td:nth-child(10) {
+      display: none !important;
+    }
+    
+    .table.table-bordered thead th:nth-child(2),
+    .table.table-bordered tbody td:nth-child(2) {
+      width: 40% !important;
+    }
+    
+    .table.table-bordered thead th:nth-child(11),
+    .table.table-bordered tbody td:nth-child(11) {
+      width: 30% !important;
+    }
+    
+    .table.table-bordered thead th:nth-child(12),
+    .table.table-bordered tbody td:nth-child(12) {
+      width: 30% !important;
+    }
+  }
 </style>
 <div class="new122">
     <div class="widget-title" style="margin: -20px 0 0">
