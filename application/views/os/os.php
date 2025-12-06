@@ -32,7 +32,10 @@
     
     .table.table-bordered thead th:nth-child(2),
     .table.table-bordered tbody td:nth-child(2) {
-      width: 40% !important;
+      width: 45% !important;
+      word-wrap: break-word !important;
+      word-break: break-word !important;
+      max-width: 150px !important;
     }
     
     .table.table-bordered thead th:nth-child(11),
@@ -42,7 +45,30 @@
     
     .table.table-bordered thead th:nth-child(12),
     .table.table-bordered tbody td:nth-child(12) {
-      width: 30% !important;
+      width: 25% !important;
+      text-align: center !important;
+    }
+    
+    /* Garantir que filtros fiquem escondidos por padrão em mobile */
+    #formFiltros.hide-mobile-form {
+      display: none !important;
+    }
+    
+    @media (min-width: 768px) {
+      #formFiltros.hide-mobile-form {
+        display: block !important;
+      }
+    }
+    
+    /* Melhorar select de status */
+    select.span12 {
+      font-size: 16px !important;
+      padding: 8px 12px !important;
+      height: auto !important;
+      min-height: 38px !important;
+      -webkit-appearance: menulist !important;
+      -moz-appearance: menulist !important;
+      appearance: menulist !important;
     }
   }
 </style>
@@ -67,31 +93,40 @@
                 </button>
             </div>
         </div>
-        <form method="get" action="<?php echo base_url(); ?>index.php/os/gerenciar" id="formFiltros" class="hide-mobile-form">
-            <div class="span3">
-                <input type="text" name="pesquisa" id="pesquisa" placeholder="Nome do cliente a pesquisar" class="span12" value="<?=set_value('pesquisa')?>" inputmode="text">
+        <form method="get" action="<?php echo base_url(); ?>index.php/os/gerenciar" id="formFiltros" class="hide-mobile-form" style="display: none;">
+            <div class="span12" style="margin-left: 0; margin-bottom: 10px;">
+                <div class="span12" style="margin-left: 0;">
+                    <input type="text" name="pesquisa" id="pesquisa" placeholder="Nome do cliente a pesquisar" class="span12" value="<?=set_value('pesquisa')?>" inputmode="text" style="font-size: 16px; padding: 8px 12px;">
+                </div>
             </div>
-            <div class="span2">
-                <select name="status" id="" class="span12">
-                    <option value="">Selecione status</option>
-                    <option value="Aberto" <?=$this->input->get('status') == 'Aberto' ? 'selected' : ''?>>Aberto</option>
-                    <option value="Faturado" <?=$this->input->get('status') == 'Faturado' ? 'selected' : ''?>>Faturado</option>
-                    <option value="Negociação" <?=$this->input->get('status') == 'Negociação' ? 'selected' : ''?>>Negociação</option>
-                    <option value="Em Andamento" <?=$this->input->get('status') == 'Em Andamento' ? 'selected' : ''?>>Em Andamento</option>
-                    <option value="Orçamento" <?=$this->input->get('status') == 'Orçamento' ? 'selected' : ''?>>Orçamento</option>
-                    <option value="Finalizado" <?=$this->input->get('status') == 'Finalizado' ? 'selected' : ''?>>Finalizado</option>
-                    <option value="Cancelado" <?=$this->input->get('status') == 'Cancelado' ? 'selected' : ''?>>Cancelado</option>
-                    <option value="Aguardando Peças" <?=$this->input->get('status') == 'Aguardando Peças' ? 'selected' : ''?>>Aguardando Peças</option>
-                    <option value="Aprovado" <?=$this->input->get('status') == 'Aprovado' ? 'selected' : ''?>>Aprovado</option>
-                </select>
+            <div class="span12" style="margin-left: 0; margin-bottom: 10px;">
+                <div class="span12" style="margin-left: 0;">
+                    <select name="status" id="statusFiltro" class="span12" style="font-size: 16px; padding: 8px 12px; height: auto; min-height: 38px;">
+                        <option value="">Selecione status</option>
+                        <option value="Aberto" <?=$this->input->get('status') == 'Aberto' ? 'selected' : ''?>>Aberto</option>
+                        <option value="Faturado" <?=$this->input->get('status') == 'Faturado' ? 'selected' : ''?>>Faturado</option>
+                        <option value="Negociação" <?=$this->input->get('status') == 'Negociação' ? 'selected' : ''?>>Negociação</option>
+                        <option value="Em Andamento" <?=$this->input->get('status') == 'Em Andamento' ? 'selected' : ''?>>Em Andamento</option>
+                        <option value="Orçamento" <?=$this->input->get('status') == 'Orçamento' ? 'selected' : ''?>>Orçamento</option>
+                        <option value="Finalizado" <?=$this->input->get('status') == 'Finalizado' ? 'selected' : ''?>>Finalizado</option>
+                        <option value="Cancelado" <?=$this->input->get('status') == 'Cancelado' ? 'selected' : ''?>>Cancelado</option>
+                        <option value="Aguardando Peças" <?=$this->input->get('status') == 'Aguardando Peças' ? 'selected' : ''?>>Aguardando Peças</option>
+                        <option value="Aprovado" <?=$this->input->get('status') == 'Aprovado' ? 'selected' : ''?>>Aprovado</option>
+                    </select>
+                </div>
             </div>
-            <div class="span3">
-                <input type="text" name="data" autocomplete="off" id="data" placeholder="Data Inicial" class="span6 datepicker" value="<?=$this->input->get('data')?>" inputmode="numeric">
-                <input type="text" name="data2" autocomplete="off" id="data2" placeholder="Data Final" class="span6 datepicker" value="<?=$this->input->get('data2')?>" inputmode="numeric">
+            <div class="span12" style="margin-left: 0; margin-bottom: 10px;">
+                <div class="span6" style="margin-left: 0;">
+                    <input type="text" name="data" autocomplete="off" id="data" placeholder="Data Inicial" class="span12 datepicker" value="<?=$this->input->get('data')?>" inputmode="numeric" style="font-size: 16px; padding: 8px 12px;">
+                </div>
+                <div class="span6">
+                    <input type="text" name="data2" autocomplete="off" id="data2" placeholder="Data Final" class="span12 datepicker" value="<?=$this->input->get('data2')?>" inputmode="numeric" style="font-size: 16px; padding: 8px 12px;">
+                </div>
             </div>
-            <div class="span1">
-                <button class="button btn btn-mini btn-warning" style="min-width: 30px">
-                    <span class="button__icon"><i class='bx bx-search-alt'></i></span></button>
+            <div class="span12" style="margin-left: 0;">
+                <button type="submit" class="button btn btn-mini btn-warning" style="width: 100%; min-height: 44px;">
+                    <span class="button__icon"><i class='bx bx-search-alt'></i></span><span class="button__text2">Buscar</span>
+                </button>
             </div>
         </form>
     </div>
@@ -192,7 +227,7 @@
 
                                 echo '<tr>';
                                 echo '<td class="hide-mobile-col">' . $r->idOs . '</td>';
-                                echo '<td class="cli1"><a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '" style="margin-right: 1%">' . $r->nomeCliente . '</a></td>';
+                                echo '<td class="cli1" style="word-wrap: break-word; word-break: break-word; max-width: 150px;"><a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '" style="margin-right: 1%">' . $r->nomeCliente . '</a></td>';
                                 echo '<td class="ph1 hide-mobile-col">' . $r->nome . '</td>';
                                 echo '<td class="hide-mobile-col">' . $dataInicial . '</td>';
                                 echo '<td class="ph2 hide-mobile-col">' . $dataFinal . '</td>';
@@ -206,25 +241,23 @@
 
                                 $editavel = $this->os_model->isEditable($r->idOs);
 
-                                // Botão Visualizar (sempre visível em mobile)
+                                // Botão Visualizar (sempre visível em mobile e desktop)
                                 if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
                                     echo '<a href="' . base_url() . 'index.php/os/visualizar/' . $r->idOs . '" class="btn-nwe mobile-action-btn" title="Ver mais detalhes"><i class="bx bx-show"></i><span class="hide-mobile-text"> Ver</span></a>';
-                                    // Outros botões escondidos em mobile
-                                    echo '<span class="hide-mobile-col">';
+                                }
+                                // Outros botões apenas em desktop
+                                echo '<span class="hide-mobile-col">';
+                                if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
                                     echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/os/imprimir/' . $r->idOs . '" target="_blank" class="btn-nwe6" title="Imprimir A4"><i class="bx bx-printer bx-xs"></i></a>';
                                     echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/os/imprimirTermica/' . $r->idOs . '" target="_blank" class="btn-nwe6" title="Imprimir Não Fiscal"><i class="bx bx-printer bx-xs"></i></a>';
-                                    echo '</span>';
                                 }
                                 if ($editavel) {
-                                    echo '<span class="hide-mobile-col">';
                                     echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/os/editar/' . $r->idOs . '" class="btn-nwe3" title="Editar OS"><i class="bx bx-edit"></i></a>';
-                                    echo '</span>';
                                 }
                                 if ($this->permission->checkPermission($this->session->userdata('permissao'), 'dOs') && $editavel) {
-                                    echo '<span class="hide-mobile-col">';
                                     echo '<a href="#modal-excluir" role="button" data-toggle="modal" os="' . $r->idOs . '" class="btn-nwe4" title="Excluir OS"><i class="bx bx-trash-alt"></i></a>  ';
-                                    echo '</span>';
                                 }
+                                echo '</span>';
                                 echo '</td>';
                                 echo '</tr>';
                             } ?>
@@ -300,9 +333,19 @@
                                 'top': '50%',
                                 'left': '50%',
                                 'transform': 'translate(-50%, -50%)',
-                                'width': '90%',
-                                'max-width': '320px',
-                                'z-index': '99999'
+                                'width': '85%',
+                                'max-width': '280px',
+                                'z-index': '99999',
+                                'font-size': '12px'
+                            });
+                            // Ajustar células do calendário
+                            $datepicker.find('table.ui-datepicker-calendar td, table.ui-datepicker-calendar th').css({
+                                'padding': '4px',
+                                'font-size': '12px'
+                            });
+                            $datepicker.find('table.ui-datepicker-calendar td a').css({
+                                'padding': '6px',
+                                'min-height': '32px'
                             });
                         }
                     }
