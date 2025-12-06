@@ -80,7 +80,7 @@
                     <tbody>
                         <?php if (!$results) {
                             echo '<tr>
-                            <td colspan="10">Nenhuma OS Cadastrada</td>
+                            <td colspan="12">Nenhuma OS Cadastrada</td>
                             </tr>';
                         }
 
