@@ -188,7 +188,28 @@
             }
         });
         $(".datepicker").datepicker({
-            dateFormat: 'dd/mm/yy'
+            dateFormat: 'dd/mm/yy',
+            beforeShow: function(input, inst) {
+                // Ajustar posicionamento do datepicker em mobile
+                setTimeout(function() {
+                    var $datepicker = $('#ui-datepicker-div');
+                    if ($datepicker.length) {
+                        var windowWidth = $(window).width();
+                        if (windowWidth < 768) {
+                            // Em mobile, centralizar o datepicker
+                            $datepicker.css({
+                                'position': 'fixed',
+                                'top': '50%',
+                                'left': '50%',
+                                'transform': 'translate(-50%, -50%)',
+                                'width': '90%',
+                                'max-width': '320px',
+                                'z-index': '99999'
+                            });
+                        }
+                    }
+                }, 10);
+            }
         });
         $('.editor').trumbowyg({
             lang: 'pt_br',
