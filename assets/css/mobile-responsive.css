@@ -300,12 +300,16 @@
     }
     
     /* Esconder colunas da tabela em mobile */
-    .hide-mobile-col {
+    .hide-mobile-col,
+    td.hide-mobile-col,
+    th.hide-mobile-col {
         display: none !important;
     }
     
     @media (min-width: 768px) {
-        .hide-mobile-col {
+        .hide-mobile-col,
+        td.hide-mobile-col,
+        th.hide-mobile-col {
             display: table-cell !important;
         }
     }
@@ -332,46 +336,44 @@
     }
     
     /* Ajustar tabela para mobile - apenas Cliente, Status e Ações */
-    @media (max-width: 767px) {
-        table thead th:nth-child(1),
-        table thead th:nth-child(3),
-        table thead th:nth-child(4),
-        table thead th:nth-child(5),
-        table thead th:nth-child(6),
-        table thead th:nth-child(7),
-        table thead th:nth-child(8),
-        table thead th:nth-child(9),
-        table thead th:nth-child(10) {
-            display: none !important;
-        }
-        
-        table tbody td:nth-child(1),
-        table tbody td:nth-child(3),
-        table tbody td:nth-child(4),
-        table tbody td:nth-child(5),
-        table tbody td:nth-child(6),
-        table tbody td:nth-child(7),
-        table tbody td:nth-child(8),
-        table tbody td:nth-child(9),
-        table tbody td:nth-child(10) {
-            display: none !important;
-        }
-        
-        /* Ajustar largura das colunas visíveis */
-        table thead th:nth-child(2),
-        table tbody td:nth-child(2) {
-            width: 40% !important;
-        }
-        
-        table thead th:nth-child(11),
-        table tbody td:nth-child(11) {
-            width: 30% !important;
-        }
-        
-        table thead th:nth-child(12),
-        table tbody td:nth-child(12) {
-            width: 30% !important;
-        }
+    .table.table-bordered thead th:nth-child(1),
+    .table.table-bordered thead th:nth-child(3),
+    .table.table-bordered thead th:nth-child(4),
+    .table.table-bordered thead th:nth-child(5),
+    .table.table-bordered thead th:nth-child(6),
+    .table.table-bordered thead th:nth-child(7),
+    .table.table-bordered thead th:nth-child(8),
+    .table.table-bordered thead th:nth-child(9),
+    .table.table-bordered thead th:nth-child(10) {
+        display: none !important;
+    }
+    
+    .table.table-bordered tbody td:nth-child(1),
+    .table.table-bordered tbody td:nth-child(3),
+    .table.table-bordered tbody td:nth-child(4),
+    .table.table-bordered tbody td:nth-child(5),
+    .table.table-bordered tbody td:nth-child(6),
+    .table.table-bordered tbody td:nth-child(7),
+    .table.table-bordered tbody td:nth-child(8),
+    .table.table-bordered tbody td:nth-child(9),
+    .table.table-bordered tbody td:nth-child(10) {
+        display: none !important;
+    }
+    
+    /* Ajustar largura das colunas visíveis */
+    .table.table-bordered thead th:nth-child(2),
+    .table.table-bordered tbody td:nth-child(2) {
+        width: 40% !important;
+    }
+    
+    .table.table-bordered thead th:nth-child(11),
+    .table.table-bordered tbody td:nth-child(11) {
+        width: 30% !important;
+    }
+    
+    .table.table-bordered thead th:nth-child(12),
+    .table.table-bordered tbody td:nth-child(12) {
+        width: 30% !important;
     }
     
     /* ============================================
