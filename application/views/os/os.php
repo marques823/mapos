@@ -387,13 +387,18 @@
         });
         
         // Toggle filtros em mobile
-        $('#btnToggleFiltros').on('click', function() {
-            $('#formFiltros').slideToggle();
-            var icon = $(this).find('i');
-            if ($('#formFiltros').is(':visible')) {
-                icon.removeClass('bx-filter').addClass('bx-filter-alt');
+        $('#btnToggleFiltros').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var $form = $('#formFiltros');
+            var isVisible = $form.is(':visible');
+            
+            if (isVisible) {
+                $form.slideUp(300);
+                $(this).find('i').removeClass('bx-filter-alt').addClass('bx-filter');
             } else {
-                icon.removeClass('bx-filter-alt').addClass('bx-filter');
+                $form.slideDown(300);
+                $(this).find('i').removeClass('bx-filter').addClass('bx-filter-alt');
             }
         });
     });
