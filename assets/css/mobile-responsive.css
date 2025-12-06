@@ -1,0 +1,423 @@
+/* ============================================
+   Mobile Responsive Styles for MapOS
+   Compatible with Bootstrap 2
+   ============================================ */
+
+/* Breakpoints */
+/* Mobile: < 768px */
+/* Tablet: 768px - 1024px */
+/* Desktop: > 1024px */
+
+@media (max-width: 767px) {
+    /* ============================================
+       Grid System - Convert span to full width
+       ============================================ */
+    
+    /* Empilhar todos os spans em mobile */
+    .span12,
+    .span11,
+    .span10,
+    .span9,
+    .span8,
+    .span7,
+    .span6,
+    .span5,
+    .span4,
+    .span3,
+    .span2,
+    .span1 {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        float: none !important;
+        display: block !important;
+    }
+    
+    /* ============================================
+       Formulários e Inputs
+       ============================================ */
+    
+    /* Inputs com tamanho de fonte adequado para evitar zoom no iOS */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    input[type="password"],
+    textarea,
+    select {
+        font-size: 16px !important; /* Evita zoom automático no iOS */
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 10px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    /* Labels mais legíveis */
+    label {
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        margin-bottom: 5px !important;
+        display: block !important;
+    }
+    
+    /* Espaçamento entre campos */
+    .control-group {
+        margin-bottom: 20px !important;
+    }
+    
+    /* ============================================
+       Botões
+       ============================================ */
+    
+    /* Botões com área de toque mínima de 44x44px */
+    .btn,
+    .button,
+    button {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        padding: 12px 20px !important;
+        font-size: 16px !important;
+        margin: 5px 0 !important;
+        display: inline-block !important;
+        width: auto !important;
+    }
+    
+    .btn-mini {
+        min-height: 44px !important;
+        padding: 10px 15px !important;
+        font-size: 14px !important;
+    }
+    
+    /* Botões em linha empilham verticalmente */
+    .btn-group,
+    .button-container {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+    
+    .btn-group .btn,
+    .button-container .button {
+        width: 100% !important;
+        margin: 5px 0 !important;
+    }
+    
+    /* ============================================
+       Tabelas
+       ============================================ */
+    
+    /* Tabelas responsivas com scroll horizontal */
+    .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        width: 100% !important;
+    }
+    
+    table {
+        min-width: 600px !important; /* Largura mínima para manter legibilidade */
+    }
+    
+    /* Headers de tabela mais legíveis */
+    table thead th {
+        font-size: 12px !important;
+        padding: 8px 4px !important;
+        white-space: nowrap !important;
+    }
+    
+    table tbody td {
+        font-size: 14px !important;
+        padding: 8px 4px !important;
+    }
+    
+    /* ============================================
+       Modais
+       ============================================ */
+    
+    .modal {
+        padding: 10px !important;
+    }
+    
+    .modal-dialog {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+    
+    .modal-content {
+        border-radius: 0 !important;
+        border: none !important;
+    }
+    
+    .modal-body {
+        padding: 15px !important;
+        max-height: calc(100vh - 200px) !important;
+        overflow-y: auto !important;
+    }
+    
+    .modal-footer {
+        padding: 10px 15px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .modal-footer .btn {
+        width: 100% !important;
+        margin: 5px 0 !important;
+    }
+    
+    /* ============================================
+       Tabs
+       ============================================ */
+    
+    .nav-tabs {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        border-bottom: 2px solid #ddd !important;
+    }
+    
+    .nav-tabs > li {
+        flex: 1 1 auto !important;
+        min-width: 120px !important;
+    }
+    
+    .nav-tabs > li > a {
+        padding: 12px 8px !important;
+        font-size: 14px !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    /* ============================================
+       Widgets e Containers
+       ============================================ */
+    
+    .widget-box {
+        margin: 10px 0 !important;
+    }
+    
+    .widget-content {
+        padding: 15px !important;
+    }
+    
+    .widget-title {
+        padding: 15px !important;
+    }
+    
+    .widget-title h5 {
+        font-size: 18px !important;
+    }
+    
+    /* ============================================
+       Formulários Específicos - OS
+       ============================================ */
+    
+    /* Campos lado a lado empilham */
+    .row-fluid [class*="span"] {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    /* Grupos de campos com flex */
+    div[style*="display: flex"] {
+        flex-direction: column !important;
+    }
+    
+    /* Inputs com ícone ao lado */
+    .input-group,
+    .input-group-mobile {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .input-group input,
+    .input-group-mobile input {
+        width: 100% !important;
+        margin-bottom: 10px !important;
+        margin-right: 0 !important;
+    }
+    
+    .input-group .btn,
+    .input-group-mobile .btn {
+        width: 100% !important;
+        margin-top: 0 !important;
+    }
+    
+    /* Botões em grupo */
+    .button-group-mobile {
+        flex-direction: column !important;
+    }
+    
+    .button-group-mobile .button,
+    .button-group-mobile .btn {
+        width: 100% !important;
+        margin: 5px 0 !important;
+    }
+    
+    /* Esconder texto em botões pequenos em mobile */
+    .hide-mobile-text {
+        display: none !important;
+    }
+    
+    @media (min-width: 768px) {
+        .hide-mobile-text {
+            display: inline !important;
+        }
+    }
+    
+    /* ============================================
+       Editor WYSIWYG (Trumbowyg)
+       ============================================ */
+    
+    /* Simplificar editor em mobile */
+    .trumbowyg-box,
+    .trumbowyg-editor {
+        min-height: 150px !important;
+    }
+    
+    .trumbowyg-button-pane {
+        flex-wrap: wrap !important;
+    }
+    
+    .trumbowyg-button-pane button {
+        min-width: 36px !important;
+        min-height: 36px !important;
+        padding: 6px !important;
+    }
+    
+    /* ============================================
+       Espaçamentos e Padding
+       ============================================ */
+    
+    [style*="padding: 1%"] {
+        padding: 15px !important;
+    }
+    
+    [style*="margin-left: 0"] {
+        margin-left: 0 !important;
+    }
+    
+    /* ============================================
+       Autocomplete e Dropdowns
+       ============================================ */
+    
+    .ui-autocomplete {
+        max-width: 100% !important;
+        font-size: 16px !important;
+    }
+    
+    .ui-menu-item {
+        padding: 12px !important;
+    }
+    
+    /* ============================================
+       Textos e Tipografia
+       ============================================ */
+    
+    h4 {
+        font-size: 18px !important;
+        margin: 15px 0 10px 0 !important;
+    }
+    
+    h5 {
+        font-size: 16px !important;
+    }
+    
+    /* ============================================
+       Well e Alertas
+       ============================================ */
+    
+    .well {
+        padding: 15px !important;
+        margin: 15px 0 !important;
+    }
+    
+    .alert {
+        padding: 12px 15px !important;
+        font-size: 14px !important;
+        margin: 10px 0 !important;
+    }
+}
+
+/* ============================================
+   Tablet (768px - 1024px)
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* Manter algumas colunas lado a lado em tablet */
+    .span6 {
+        width: 48% !important;
+        margin-left: 2% !important;
+    }
+    
+    .span6:first-child {
+        margin-left: 0 !important;
+    }
+    
+    .span4 {
+        width: 31% !important;
+        margin-left: 2% !important;
+    }
+    
+    .span4:first-child {
+        margin-left: 0 !important;
+    }
+    
+    .span3 {
+        width: 23% !important;
+        margin-left: 2% !important;
+    }
+    
+    .span3:first-child {
+        margin-left: 0 !important;
+    }
+    
+    /* Botões um pouco menores em tablet */
+    .btn,
+    .button {
+        min-height: 40px !important;
+        padding: 10px 18px !important;
+    }
+}
+
+/* ============================================
+   Utilitários
+   ============================================ */
+
+/* Classe helper para esconder em mobile */
+.hide-mobile {
+    display: none !important;
+}
+
+@media (min-width: 768px) {
+    .hide-mobile {
+        display: block !important;
+    }
+}
+
+/* Classe helper para mostrar apenas em mobile */
+.show-mobile {
+    display: block !important;
+}
+
+@media (min-width: 768px) {
+    .show-mobile {
+        display: none !important;
+    }
+}
+
+/* Classe para inputs numéricos */
+input[type="number"],
+input[inputmode="numeric"] {
+    -webkit-appearance: textfield !important;
+    -moz-appearance: textfield !important;
+}
+
+/* Melhorar área de toque em elementos interativos */
+a, button, input[type="submit"], input[type="button"], 
+input[type="checkbox"], input[type="radio"], label {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
+}
+

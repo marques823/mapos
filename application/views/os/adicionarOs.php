@@ -32,10 +32,10 @@
                                     <div class="span12" style="padding: 1%">
                                         <div class="span6">
                                             <label for="cliente">Cliente<span class="required">*</span></label>
-                                            <div style="display: flex; gap: 5px; align-items: flex-start;">
-                                                <input id="cliente" class="span10" type="text" name="cliente" value="" style="margin-right: 5px;" />
+                                            <div class="input-group-mobile" style="display: flex; gap: 5px; align-items: flex-start;">
+                                                <input id="cliente" class="span10" type="text" name="cliente" value="" style="margin-right: 5px;" autocomplete="off" />
                                                 <button type="button" class="btn btn-mini btn-success" id="btnCadastrarClienteRapido" title="Cadastrar Cliente Rápido" style="white-space: nowrap; margin-top: 0;">
-                                                    <i class="icon-plus"></i> Novo
+                                                    <i class="icon-plus"></i> <span class="hide-mobile-text">Novo</span>
                                                 </button>
                                             </div>
                                             <input id="clientes_id" class="span12" type="hidden" name="clientes_id" value="" />
@@ -63,15 +63,15 @@
                                         </div>
                                         <div class="span3">
                                             <label for="dataInicial">Data Inicial<span class="required">*</span></label>
-                                            <input id="dataInicial" autocomplete="off" class="span12 datepicker" type="text" name="dataInicial" value="<?php echo date('d/m/Y'); ?>" />
+                                            <input id="dataInicial" autocomplete="off" class="span12 datepicker" type="text" name="dataInicial" value="<?php echo date('d/m/Y'); ?>" inputmode="numeric" />
                                         </div>
                                         <div class="span3">
                                             <label for="dataFinal">Data Final<span class="required">*</span></label>
-                                            <input id="dataFinal" autocomplete="off" class="span12 datepicker" type="text" name="dataFinal" value="" />
+                                            <input id="dataFinal" autocomplete="off" class="span12 datepicker" type="text" name="dataFinal" value="" inputmode="numeric" />
                                         </div>
                                         <div class="span3">
                                             <label for="garantia">Garantia (dias)</label>
-                                            <input id="garantia" type="number" placeholder="Status s/g inserir nº/0" min="0" max="9999" class="span12" name="garantia" value="" />
+                                            <input id="garantia" type="number" placeholder="Status s/g inserir nº/0" min="0" max="9999" class="span12" name="garantia" value="" inputmode="numeric" />
                                             <?php echo form_error('garantia'); ?>
                                             <label for="termoGarantia">Termo Garantia</label>
                                             <input id="termoGarantia" class="span12" type="text" name="termoGarantia" value="" />
@@ -107,10 +107,10 @@
                                         <textarea class="span12 editor" name="laudoTecnico" id="laudoTecnico" cols="30" rows="5"></textarea>
                                     </div>
                                     <div class="span12" style="padding: 1%; margin-left: 0">
-                                        <div class="span12" style="display:flex; justify-content: center;">
-                                            <button class="button btn btn-success" id="btnContinuar">
+                                        <div class="span12 button-group-mobile" style="display:flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                                            <button class="button btn btn-success" id="btnContinuar" style="flex: 1; min-width: 120px;">
                                               <span class="button__icon"><i class='bx bx-chevrons-right'></i></span><span class="button__text2">Continuar</span></button>
-                                            <a href="<?php echo base_url() ?>index.php/os" class="button btn btn-mini btn-warning" style="max-width: 160px">
+                                            <a href="<?php echo base_url() ?>index.php/os" class="button btn btn-mini btn-warning" style="flex: 1; min-width: 120px;">
                                               <span class="button__icon"><i class="bx bx-undo"></i></span><span class="button__text2">Voltar</span></a>
                                         </div>
                                     </div>
@@ -119,7 +119,6 @@
                         </div>
                     </div>
                 </div>
-                .
             </div>
         </div>
     </div>
@@ -343,11 +342,11 @@
             <div class="span12" style="padding: 1%; margin-left: 0;">
                 <div class="span6">
                     <label for="telefoneRapido">Telefone</label>
-                    <input id="telefoneRapido" class="span12" type="text" name="telefone" />
+                    <input id="telefoneRapido" class="span12" type="tel" name="telefone" inputmode="tel" />
                 </div>
                 <div class="span6">
                     <label for="celularRapido">Celular</label>
-                    <input id="celularRapido" class="span12" type="text" name="celular" />
+                    <input id="celularRapido" class="span12" type="tel" name="celular" inputmode="tel" />
                 </div>
             </div>
             <div class="span12" style="padding: 1%; margin-left: 0;">
@@ -363,7 +362,7 @@
                 </div>
                 <div class="span4">
                     <label for="numeroRapido">Número</label>
-                    <input id="numeroRapido" class="span12" type="text" name="numero" />
+                    <input id="numeroRapido" class="span12" type="text" name="numero" inputmode="numeric" />
                 </div>
             </div>
             <div class="span12" style="padding: 1%; margin-left: 0;">
@@ -381,7 +380,7 @@
                 </div>
                 <div class="span2">
                     <label for="cepRapido">CEP</label>
-                    <input id="cepRapido" class="span12" type="text" name="cep" />
+                    <input id="cepRapido" class="span12" type="text" name="cep" inputmode="numeric" />
                 </div>
             </div>
             <div class="span12" style="padding: 1%; margin-left: 0;">
