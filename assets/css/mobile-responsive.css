@@ -336,6 +336,16 @@
     }
     
     /* Ajustar tabela para mobile - apenas Cliente, Status e Ações */
+    /* Usar seletores muito específicos para garantir que funcione */
+    .table-responsive .table.table-bordered thead th:nth-child(1),
+    .table-responsive .table.table-bordered thead th:nth-child(3),
+    .table-responsive .table.table-bordered thead th:nth-child(4),
+    .table-responsive .table.table-bordered thead th:nth-child(5),
+    .table-responsive .table.table-bordered thead th:nth-child(6),
+    .table-responsive .table.table-bordered thead th:nth-child(7),
+    .table-responsive .table.table-bordered thead th:nth-child(8),
+    .table-responsive .table.table-bordered thead th:nth-child(9),
+    .table-responsive .table.table-bordered thead th:nth-child(10),
     .table.table-bordered thead th:nth-child(1),
     .table.table-bordered thead th:nth-child(3),
     .table.table-bordered thead th:nth-child(4),
@@ -348,6 +358,15 @@
         display: none !important;
     }
     
+    .table-responsive .table.table-bordered tbody td:nth-child(1),
+    .table-responsive .table.table-bordered tbody td:nth-child(3),
+    .table-responsive .table.table-bordered tbody td:nth-child(4),
+    .table-responsive .table.table-bordered tbody td:nth-child(5),
+    .table-responsive .table.table-bordered tbody td:nth-child(6),
+    .table-responsive .table.table-bordered tbody td:nth-child(7),
+    .table-responsive .table.table-bordered tbody td:nth-child(8),
+    .table-responsive .table.table-bordered tbody td:nth-child(9),
+    .table-responsive .table.table-bordered tbody td:nth-child(10),
     .table.table-bordered tbody td:nth-child(1),
     .table.table-bordered tbody td:nth-child(3),
     .table.table-bordered tbody td:nth-child(4),
@@ -361,16 +380,22 @@
     }
     
     /* Ajustar largura das colunas visíveis */
+    .table-responsive .table.table-bordered thead th:nth-child(2),
+    .table-responsive .table.table-bordered tbody td:nth-child(2),
     .table.table-bordered thead th:nth-child(2),
     .table.table-bordered tbody td:nth-child(2) {
         width: 40% !important;
     }
     
+    .table-responsive .table.table-bordered thead th:nth-child(11),
+    .table-responsive .table.table-bordered tbody td:nth-child(11),
     .table.table-bordered thead th:nth-child(11),
     .table.table-bordered tbody td:nth-child(11) {
         width: 30% !important;
     }
     
+    .table-responsive .table.table-bordered thead th:nth-child(12),
+    .table-responsive .table.table-bordered tbody td:nth-child(12),
     .table.table-bordered thead th:nth-child(12),
     .table.table-bordered tbody td:nth-child(12) {
         width: 30% !important;
