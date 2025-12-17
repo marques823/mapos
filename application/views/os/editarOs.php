@@ -76,7 +76,12 @@
                                         <h3>N° OS: <?php echo $result->idOs; ?></h3>
                                         <div class="span6" style="margin-left: 0">
                                             <label for="cliente">Cliente<span class="required">*</span></label>
-                                            <input id="cliente" class="span12" type="text" name="cliente" value="<?php echo $result->nomeCliente ?>" />
+                                            <div style="display: flex; gap: 5px; align-items: flex-start;">
+                                                <input id="cliente" class="span10" type="text" name="cliente" value="<?php echo $result->nomeCliente ?>" style="margin-right: 5px;" />
+                                                <button type="button" class="btn btn-mini btn-success" id="btnCadastrarClienteRapido" title="Cadastrar Cliente Rápido" style="white-space: nowrap; margin-top: 0;">
+                                                    <i class="icon-plus"></i> Novo
+                                                </button>
+                                            </div>
                                             <input id="clientes_id" class="span12" type="hidden" name="clientes_id" value="<?php echo $result->clientes_id ?>" />
                                             <input id="valor" type="hidden" name="valor" value="" />
                                         </div>
@@ -121,18 +126,34 @@
                                     <div class="span6" style="padding: 1%; margin-left: 0">
                                         <label for="descricaoProduto"><h4>Descrição Produto/Serviço</h4></label>
                                         <textarea class="span12 editor" name="descricaoProduto" id="descricaoProduto" cols="30" rows="5"><?php echo $result->descricaoProduto ?></textarea>
+                                        <label style="margin-top: 10px;">
+                                            <input type="checkbox" name="imprimir_descricao" id="imprimir_descricao" value="1" <?php echo (isset($result->imprimir_descricao) && $result->imprimir_descricao == 1) ? 'checked' : ''; ?> />
+                                            Exibir descrição na impressão
+                                        </label>
                                     </div>
                                     <div class="span6" style="padding: 1%; margin-left: 0">
                                         <label for="defeito"><h4>Defeito</h4></label>
                                         <textarea class="span12 editor" name="defeito" id="defeito" cols="30" rows="5"><?php echo $result->defeito ?></textarea>
+                                        <label style="margin-top: 10px;">
+                                            <input type="checkbox" name="imprimir_defeito" id="imprimir_defeito" value="1" <?php echo (isset($result->imprimir_defeito) && $result->imprimir_defeito == 1) ? 'checked' : ''; ?> />
+                                            Exibir defeito na impressão
+                                        </label>
                                     </div>
                                     <div class="span6" style="padding: 1%; margin-left: 0">
                                         <label for="observacoes"><h4>Observações</h4></label>
                                         <textarea class="span12 editor" name="observacoes" id="observacoes" cols="30" rows="5"><?php echo $result->observacoes ?></textarea>
+                                        <label style="margin-top: 10px;">
+                                            <input type="checkbox" name="imprimir_observacoes" id="imprimir_observacoes" value="1" <?php echo (isset($result->imprimir_observacoes) && $result->imprimir_observacoes == 1) ? 'checked' : ''; ?> />
+                                            Exibir observações na impressão
+                                        </label>
                                     </div>
                                     <div class="span6" style="padding: 1%; margin-left: 0">
                                         <label for="laudoTecnico"><h4>Laudo Técnico</h4></label>
                                         <textarea class="span12 editor" name="laudoTecnico" id="laudoTecnico" cols="30" rows="5"><?php echo $result->laudoTecnico ?></textarea>
+                                        <label style="margin-top: 10px;">
+                                            <input type="checkbox" name="imprimir_laudo" id="imprimir_laudo" value="1" <?php echo (isset($result->imprimir_laudo) && $result->imprimir_laudo == 1) ? 'checked' : ''; ?> />
+                                            Exibir laudo técnico na impressão
+                                        </label>
                                     </div>
                                     <div class="span12" style="padding: 0; margin-left: 0">
                                         <div class="span12" style="display:flex; justify-content: center;">
@@ -263,13 +284,21 @@
                             <div class="span12 well" style="padding: 1%; margin-left: 0">
                                 <form id="formServicos" action="<?php echo base_url() ?>index.php/os/adicionarServico"
                                     method="post">
-                                    <div class="span6">
+                                    <div class="span5">
                                         <input type="hidden" name="idServico" id="idServico" />
                                         <input type="hidden" name="idOsServico" id="idOsServico"
                                             value="<?php echo $result->idOs; ?>" />
                                         <label for="">Serviço</label>
                                         <input type="text" class="span12" name="servico" id="servico"
                                             placeholder="Digite o nome do serviço" />
+                                    </div>
+                                    <div class="span1">
+                                        <label for="">&nbsp;</label>
+                                        <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aServico')) : ?>
+                                        <a href="#modal-novo-servico" role="button" data-toggle="modal" class="button btn btn-mini btn-info" style="width: 100%;" title="Criar Novo Serviço">
+                                            <span class="button__icon"><i class='bx bx-plus'></i></span>
+                                        </a>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="span2">
                                         <label for="">Preço</label>
@@ -287,6 +316,10 @@
                                         <button class="button btn btn-success">
                                             <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span
                                                 class="button__text2">Adicionar</span></button>
+                                    </div>
+                                    <div class="span12" style="margin-top: 10px;">
+                                        <label for="">Detalhes</label>
+                                        <textarea placeholder="Detalhes do serviço (opcional)" id="detalhes_servico" name="detalhes" class="span12" rows="2"></textarea>
                                     </div>
                                 </form>
                             </div>
@@ -309,12 +342,20 @@
                                                 $preco = $s->preco ?: $s->precoVenda;
                                                 $subtotals = $preco * ($s->quantidade ?: 1);
                                                 $totals = $totals + $subtotals;
-                                                echo '<tr>';
-                                                echo '<td>' . $s->nome . '</td>';
+                                                echo '<tr id="servico-row-' . $s->idServicos_os . '">';
+                                                echo '<td>';
+                                                echo '<strong>' . $s->nome . '</strong>';
+                                                if (!empty($s->detalhes)) {
+                                                    echo '<br><small style="color: #666;">' . htmlspecialchars($s->detalhes) . '</small>';
+                                                }
+                                                echo '</td>';
                                                 echo '<td><div align="center">' . ($s->quantidade ?: 1) . '</div></td>';
-                                                echo '<td><div align="center">R$ ' . $preco . '</div></td>';
-                                                echo '<td><div align="center"><span idAcao="' . $s->idServicos_os . '" title="Excluir Serviço" class="btn-nwe4 servico"><i class="bx bx-trash-alt"></i></span></div></td>';
-                                                echo '<td><div align="center">R$: ' . number_format($subtotals, 2, ',', '.') . '</div></td>';
+                                                echo '<td><div align="center"><span class="preco-servico-display" id="preco-display-' . $s->idServicos_os . '">R$ ' . number_format($preco, 2, ',', '.') . '</span></div></td>';
+                                                echo '<td><div align="center">';
+                                                echo '<span idAcao="' . $s->idServicos_os . '" precoAtual="' . number_format($preco, 2, '.', '') . '" quantidadeAtual="' . ($s->quantidade ?: 1) . '" detalhesAtual="' . htmlspecialchars($s->detalhes ?? '', ENT_QUOTES) . '" title="Editar Serviço" class="btn-nwe4 editar-servico" style="margin-right: 5px; color: #007bff; cursor: pointer;"><i class="bx bx-edit"></i></span>';
+                                                echo '<span idAcao="' . $s->idServicos_os . '" title="Excluir Serviço" class="btn-nwe4 servico" style="color: #dc3545; cursor: pointer;"><i class="bx bx-trash-alt"></i></span>';
+                                                echo '</div></td>';
+                                                echo '<td><div align="center"><span id="subtotal-' . $s->idServicos_os . '">R$: ' . number_format($subtotals, 2, ',', '.') . '</span></div></td>';
                                                 echo '</tr>';
                                             } ?>
                                         </tbody>
@@ -466,6 +507,86 @@
         <div class="modal-footer" style="display:flex;justify-content: center">
             <button class="btn" data-dismiss="modal" aria-hidden="true" id="btn-close-anotacao">Fechar</button>
             <button class="btn btn-primary">Adicionar</button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal Editar Preço Serviço -->
+<div id="modal-editar-preco-servico" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <form id="formEditarPrecoServico" method="post">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">Editar Serviço</h3>
+        </div>
+        <div class="modal-body">
+            <div class="control-group">
+                <label for="servico_nome_editar" class="control-label">Serviço</label>
+                <div class="controls">
+                    <input type="text" id="servico_nome_editar" class="span12" readonly />
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="preco_servico_editar" class="control-label">Novo Preço<span class="required">*</span></label>
+                <div class="controls">
+                    <input type="text" id="preco_servico_editar" name="preco" class="span12 money" 
+                        data-affixes-stay="true" data-thousands="" data-decimal="." placeholder="0.00" />
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="quantidade_servico_editar" class="control-label">Quantidade</label>
+                <div class="controls">
+                    <input type="text" id="quantidade_servico_editar" name="quantidade" class="span12" readonly />
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="detalhes_servico_editar" class="control-label">Detalhes</label>
+                <div class="controls">
+                    <textarea id="detalhes_servico_editar" name="detalhes" class="span12" rows="3" placeholder="Detalhes do serviço (opcional)"></textarea>
+                </div>
+            </div>
+            <input type="hidden" id="idServicos_os_editar" name="idServicos_os" />
+            <input type="hidden" id="idOs_editar" name="idOs" value="<?php echo $result->idOs; ?>" />
+        </div>
+        <div class="modal-footer" style="display:flex;justify-content: center">
+            <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal Novo Serviço Rápido -->
+<div id="modal-novo-servico" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <form id="formNovoServico" method="post">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">Criar Novo Serviço</h3>
+        </div>
+        <div class="modal-body">
+            <div class="control-group">
+                <label for="nome_servico_rapido" class="control-label">Nome do Serviço<span class="required">*</span></label>
+                <div class="controls">
+                    <input type="text" id="nome_servico_rapido" name="nome" class="span12" placeholder="Ex: Instalação de Sistema" />
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="preco_servico_rapido" class="control-label">Preço<span class="required">*</span></label>
+                <div class="controls">
+                    <input type="text" id="preco_servico_rapido" name="preco" class="span12 money" 
+                        data-affixes-stay="true" data-thousands="" data-decimal="." placeholder="0.00" />
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="descricao_servico_rapido" class="control-label">Descrição</label>
+                <div class="controls">
+                    <input type="text" id="descricao_servico_rapido" name="descricao" class="span12" placeholder="Descrição opcional" />
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="display:flex;justify-content: center">
+            <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Criar Serviço</button>
         </div>
     </form>
 </div>
@@ -637,6 +758,16 @@
     $(document).ready(function () {
 
         $(".money").maskMoney();
+        
+        // Inicializar maskMoney no modal quando abrir
+        $('#modal-novo-servico').on('shown', function() {
+            $('#preco_servico_rapido').maskMoney();
+        });
+        
+        // Inicializar maskMoney no modal de editar preço quando abrir
+        $('#modal-editar-preco-servico').on('shown', function() {
+            $('#preco_servico_editar').maskMoney();
+        });
 
         $('#recebido').click(function (event) {
             var flag = $(this).is(':checked');
@@ -841,6 +972,86 @@
             }
         });
 
+        // Formulário para criar novo serviço rapidamente
+        $("#formNovoServico").validate({
+            rules: {
+                nome_servico_rapido: {
+                    required: true
+                },
+                preco_servico_rapido: {
+                    required: true
+                }
+            },
+            messages: {
+                nome_servico_rapido: {
+                    required: 'Campo obrigatório.'
+                },
+                preco_servico_rapido: {
+                    required: 'Campo obrigatório.'
+                }
+            },
+            submitHandler: function(form) {
+                var dados = $(form).serialize();
+                
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo base_url(); ?>index.php/os/criarServicoRapido",
+                    data: dados,
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.result == true) {
+                            // Fechar modal
+                            $('#modal-novo-servico').modal('hide');
+                            
+                            // Limpar formulário
+                            $('#formNovoServico')[0].reset();
+                            
+                            // Preencher campos com o serviço recém-criado
+                            $("#idServico").val(data.servico.id);
+                            $("#servico").val(data.servico.nome);
+                            $("#preco_servico").val(data.servico.preco);
+                            $("#quantidade_servico").focus();
+                            
+                            // Mostrar mensagem de sucesso
+                            Swal.fire({
+                                type: "success",
+                                title: "Sucesso!",
+                                text: data.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            
+                            // Forçar atualização do autocomplete (destruir e recriar)
+                            $("#servico").autocomplete("destroy");
+                            $("#servico").autocomplete({
+                                source: "<?php echo base_url(); ?>index.php/os/autoCompleteServico",
+                                minLength: 2,
+                                select: function (event, ui) {
+                                    $("#idServico").val(ui.item.id);
+                                    $("#preco_servico").val(ui.item.preco);
+                                    $("#quantidade_servico").focus();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                type: "error",
+                                title: "Erro",
+                                text: data.message || "Ocorreu um erro ao criar o serviço."
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            type: "error",
+                            title: "Erro",
+                            text: "Ocorreu um erro ao comunicar com o servidor."
+                        });
+                    }
+                });
+                return false;
+            }
+        });
+
 
         $("#cliente").autocomplete({
             source: "<?php echo base_url(); ?>index.php/os/autoCompleteCliente",
@@ -1013,6 +1224,7 @@
                             $("#divServicos").load("<?php echo current_url(); ?> #divServicos");
                             $("#quantidade_servico").val('');
                             $("#preco_servico").val('');
+                            $("#detalhes_servico").val('');
                             $("#resultado").val('');
                             $("#desconto").val('');
                             $("#divValorTotal").load("<?php echo current_url(); ?> #divValorTotal");
@@ -1135,6 +1347,87 @@
 
         });
 
+        // Editar preço do serviço
+        $(document).on('click', '.editar-servico', function (event) {
+            event.preventDefault();
+            var idServicosOs = $(this).attr('idAcao');
+            var precoAtual = $(this).attr('precoAtual');
+            var quantidadeAtual = $(this).attr('quantidadeAtual');
+            var detalhesAtual = $(this).attr('detalhesAtual') || '';
+            
+            // Buscar nome do serviço da linha (remover detalhes se existirem)
+            var nomeServico = $(this).closest('tr').find('td:first').find('strong').text() || $(this).closest('tr').find('td:first').text();
+            
+            // Preencher modal
+            $('#servico_nome_editar').val(nomeServico.trim());
+            $('#preco_servico_editar').val(precoAtual);
+            $('#quantidade_servico_editar').val(quantidadeAtual);
+            $('#detalhes_servico_editar').val(detalhesAtual);
+            $('#idServicos_os_editar').val(idServicosOs);
+            
+            // Abrir modal
+            $('#modal-editar-preco-servico').modal('show');
+        });
+        
+        // Formulário para editar preço do serviço
+        $("#formEditarPrecoServico").validate({
+            rules: {
+                preco: {
+                    required: true
+                }
+            },
+            messages: {
+                preco: {
+                    required: 'Campo obrigatório.'
+                }
+            },
+            submitHandler: function(form) {
+                var dados = $(form).serialize();
+                
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo base_url(); ?>index.php/os/editarPrecoServico",
+                    data: dados,
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.result == true) {
+                            // Fechar modal
+                            $('#modal-editar-preco-servico').modal('hide');
+                            
+                            // Recarregar tabela de serviços e total
+                            $("#divServicos").load("<?php echo current_url(); ?> #divServicos");
+                            $("#divValorTotal").load("<?php echo current_url(); ?> #divValorTotal");
+                            $("#resultado").val('');
+                            $("#desconto").val('');
+                            
+                            // Mostrar mensagem de sucesso
+                            Swal.fire({
+                                type: "success",
+                                title: "Sucesso!",
+                                text: data.message || "Preço atualizado com sucesso!",
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                type: "error",
+                                title: "Erro",
+                                text: data.message || "Ocorreu um erro ao atualizar o preço."
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            type: "error",
+                            title: "Erro",
+                            text: "Ocorreu um erro ao comunicar com o servidor."
+                        });
+                    }
+                });
+                return false;
+            }
+        });
+
         $(document).on('click', '.servico', function (event) {
             var idServico = $(this).attr('idAcao');
             var idOS = "<?php echo $result->idOs ?>"
@@ -1238,5 +1531,175 @@
             lang: 'pt_br',
             semantic: { 'strikethrough': 's', }
         });
+
+        // Modal para cadastro rápido de cliente
+        $('#btnCadastrarClienteRapido').on('click', function() {
+            $('#modalClienteRapido').modal('show');
+        });
+
+        // Salvar cliente rápido
+        $('#formClienteRapido').on('submit', function(e) {
+            e.preventDefault();
+            
+            var nomeCliente = $('#nomeClienteRapido').val().trim();
+            
+            if (!nomeCliente) {
+                if (typeof Swal !== 'undefined' && Swal.fire) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'O nome do cliente é obrigatório!'
+                    });
+                } else {
+                    alert('O nome do cliente é obrigatório!');
+                }
+                return false;
+            }
+
+            var dados = {
+                nomeCliente: nomeCliente,
+                telefone: $('#telefoneRapido').val().trim() || '',
+                celular: $('#celularRapido').val().trim() || '',
+                email: $('#emailRapido').val().trim() || '',
+                rua: $('#ruaRapido').val().trim() || '',
+                numero: $('#numeroRapido').val().trim() || '',
+                bairro: $('#bairroRapido').val().trim() || '',
+                cidade: $('#cidadeRapido').val().trim() || '',
+                estado: $('#estadoRapido').val().trim() || '',
+                cep: $('#cepRapido').val().trim() || ''
+            };
+
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php/os/cadastrarClienteRapido',
+                type: 'POST',
+                data: dados,
+                dataType: 'json',
+                beforeSend: function() {
+                    $('#btnSalvarClienteRapido').prop('disabled', true).html('<i class="icon-spinner icon-spin"></i> Salvando...');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Atualizar campo de cliente
+                        $('#cliente').val(response.cliente.nomeCliente);
+                        $('#clientes_id').val(response.cliente.idClientes);
+                        
+                        // Fechar modal e limpar formulário
+                        $('#modalClienteRapido').modal('hide');
+                        $('#formClienteRapido')[0].reset();
+                        
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso!',
+                                text: 'Cliente cadastrado com sucesso!',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            alert('Cliente cadastrado com sucesso!');
+                        }
+                    } else {
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro',
+                                text: response.message || 'Erro ao cadastrar cliente.'
+                            });
+                        } else {
+                            alert(response.message || 'Erro ao cadastrar cliente.');
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    var errorMsg = 'Erro ao comunicar com o servidor.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    if (typeof Swal !== 'undefined' && Swal.fire) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: errorMsg
+                        });
+                    } else {
+                        alert(errorMsg);
+                    }
+                },
+                complete: function() {
+                    $('#btnSalvarClienteRapido').prop('disabled', false).html('<i class="icon-save"></i> Salvar');
+                }
+            });
+        });
     });
 </script>
+
+<!-- Modal para Cadastro Rápido de Cliente -->
+<div id="modalClienteRapido" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Cadastrar Cliente Rápido</h3>
+    </div>
+    <form id="formClienteRapido">
+        <div class="modal-body">
+            <div class="span12" style="padding: 1%; margin-left: 0;">
+                <div class="span12" style="margin-left: 0;">
+                    <label for="nomeClienteRapido">Nome do Cliente<span class="required">*</span></label>
+                    <input id="nomeClienteRapido" class="span12" type="text" name="nomeCliente" required />
+                </div>
+            </div>
+            <div class="span12" style="padding: 1%; margin-left: 0;">
+                <div class="span6">
+                    <label for="telefoneRapido">Telefone</label>
+                    <input id="telefoneRapido" class="span12" type="text" name="telefone" />
+                </div>
+                <div class="span6">
+                    <label for="celularRapido">Celular</label>
+                    <input id="celularRapido" class="span12" type="text" name="celular" />
+                </div>
+            </div>
+            <div class="span12" style="padding: 1%; margin-left: 0;">
+                <div class="span12" style="margin-left: 0;">
+                    <label for="emailRapido">E-mail</label>
+                    <input id="emailRapido" class="span12" type="email" name="email" />
+                </div>
+            </div>
+            <div class="span12" style="padding: 1%; margin-left: 0;">
+                <div class="span8">
+                    <label for="ruaRapido">Rua</label>
+                    <input id="ruaRapido" class="span12" type="text" name="rua" />
+                </div>
+                <div class="span4">
+                    <label for="numeroRapido">Número</label>
+                    <input id="numeroRapido" class="span12" type="text" name="numero" />
+                </div>
+            </div>
+            <div class="span12" style="padding: 1%; margin-left: 0;">
+                <div class="span4">
+                    <label for="bairroRapido">Bairro</label>
+                    <input id="bairroRapido" class="span12" type="text" name="bairro" />
+                </div>
+                <div class="span4">
+                    <label for="cidadeRapido">Cidade</label>
+                    <input id="cidadeRapido" class="span12" type="text" name="cidade" />
+                </div>
+                <div class="span2">
+                    <label for="estadoRapido">Estado</label>
+                    <input id="estadoRapido" class="span12" type="text" name="estado" maxlength="2" placeholder="UF" />
+                </div>
+                <div class="span2">
+                    <label for="cepRapido">CEP</label>
+                    <input id="cepRapido" class="span12" type="text" name="cep" />
+                </div>
+            </div>
+            <div class="span12" style="padding: 1%; margin-left: 0;">
+                <small style="color: #666;">* Campos marcados são obrigatórios. Os demais podem ser preenchidos posteriormente.</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+            <button type="submit" class="btn btn-success" id="btnSalvarClienteRapido">
+                <i class="icon-save"></i> Salvar
+            </button>
+        </div>
+    </form>
+</div>

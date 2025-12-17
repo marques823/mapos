@@ -99,6 +99,73 @@ Tutorial Instalação: [https://youtu.be/NgXzzBB_2bM?si=FS_R2xq_W0Jnfn33](https:
 2. Quando estiver nessa versão é possível atualizar o sistema clicando no botão "Atualizar Mapos" em Sistema >> Configurações;
 3. Serão baixados e atualizados todos os arquivos exceto: `config.php`, `database.php` e `email.php`;
 
+### Novas Funcionalidades
+
+#### Módulo de Notas de Entrada
+- **Upload de XML**: Importe notas fiscais (NFe e NFSe) através de upload de arquivo XML
+- **Busca SEFAZ com Certificado Digital**: 
+  - Busque notas fiscais diretamente na SEFAZ usando certificado digital A1
+  - Suporte para certificados .p12, .pfx e .pem
+  - Download automático do XML completo da nota
+  - Processamento automático após download
+- **Consulta de Fila de Distribuição**:
+  - Consulte todas as notas disponíveis na fila da SEFAZ pelo CNPJ do emitente
+  - Lista todas as notas pendentes de download
+  - Baixe e processe múltiplas notas de uma vez
+  - Controle de NSU para consultas incrementais
+- **Processamento Automático**: Extração automática de dados da nota e itens
+- **Adicionar ao Estoque**: Adicione itens da nota diretamente ao estoque com:
+  - Cálculo automático de preço de venda por markup (%)
+  - Edição individual de preço de venda por item
+  - Criação automática de produtos não cadastrados
+  - Atualização de estoque de produtos existentes
+- **Visualização Completa**: Visualize todos os dados da nota fiscal e seus itens
+- **Configuração de Certificado Digital**: 
+  - Upload e configuração de certificado digital nas configurações do sistema
+  - Suporte para certificados A1 (arquivo)
+  - Armazenamento seguro (certificados não são versionados no Git)
+
+#### Campos Fiscais em Produtos
+- **NCM** (Nomenclatura Comum do Mercosul): Código de 8 dígitos
+- **CEST** (Código Especificador da Substituição Tributária): Código de 7 dígitos
+- **CFOP** (Código Fiscal de Operações e Prestações): Código de 4 dígitos
+- **Origem**: Classificação da origem da mercadoria (0-8)
+- **Tributação ICMS**: Códigos de tributação do ICMS (00-90)
+- Disponível em: Cadastro, Edição e Visualização de Produtos
+
+#### Melhorias em Produtos
+- **Clonar Produto**: Duplique produtos existentes com um clique
+  - Mantém todos os dados do produto original
+  - Estoque zerado na cópia
+  - Código de barras e descrição marcados como cópia
+  - Redireciona para edição do novo produto
+- **Botão Editar na Visualização**: Acesso rápido à edição diretamente da página de visualização
+- **Nome Clicável na Lista**: 
+  - Clique no nome do produto para visualizar
+  - Melhor experiência em dispositivos móveis
+  - Área de clique ampliada para facilitar o toque
+- **Interface Responsiva**: Otimizada para uso em celulares e tablets
+
+#### Importação em Massa
+- **Clientes/Fornecedores**: Importe múltiplos clientes via arquivo CSV
+- **Produtos**: Importe múltiplos produtos via arquivo CSV com campos fiscais
+- **Modelos para Download**: Templates CSV disponíveis para download
+- **Validação Automática**: Validação de dados e tratamento de duplicatas
+- **Relatório de Importação**: Feedback detalhado sobre sucessos, erros e duplicatas
+
+#### Melhorias na Ordem de Serviço
+- **Criação Rápida de Cliente**: Cadastre clientes pessoa física diretamente na tela de criação de OS
+  - Cadastro simplificado com informações mínimas
+  - Permite cadastro incompleto para edição posterior
+  - Ideal para atendimentos rápidos
+- **Criação Rápida de Serviços**: Crie novos serviços diretamente na tela de edição de OS
+- **Edição de Preço de Serviço**: Altere o preço de serviços dentro da OS sem afetar o preço original
+- **Personalização por Cliente**: Ajuste valores de serviços conforme necessário
+- **Campo Detalhes em Serviços**: 
+  - Adicione detalhes específicos para cada serviço na OS
+  - Detalhes são exibidos na impressão da OS
+  - Permite personalização de informações por serviço
+
 ### Comandos de terminal
 
 Para listar todos os comandos de terminal disponíveis, basta executar o comando `php index.php tools` a partir da raiz do projeto, após feita todo o processo de instalação.
