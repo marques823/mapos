@@ -2,6 +2,7 @@
 <script type="text/javascript" src="<?php echo base_url() ?>assets/js/jquery-ui/js/jquery-ui-1.9.2.custom.js"></script>
 <script type="text/javascript" src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
 <script src="<?php echo base_url() ?>assets/js/jquery.mask.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
 <script src="<?php echo base_url() ?>assets/js/sweetalert2.all.min.js"></script>
 <script src="<?php echo base_url() ?>assets/js/funcoes.js"></script>
 
@@ -22,6 +23,7 @@
 
                     <ul class="nav nav-tabs">
                         <li class="active" id="tabDetalhes"><a href="#tab1" data-toggle="tab">Detalhes da OS</a></li>
+                        <li id="tabOutros"><a href="#tab7" data-toggle="tab">Outros Produtos/Serviços</a></li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab1">
@@ -141,6 +143,50 @@
                                             Exibir laudo técnico na impressão
                                         </label>
                                     </div>
+                                    <div class="span12" style="padding: 1%; margin-left: 0; border-top: 1px solid #ddd; margin-top: 15px; padding-top: 15px;">
+                                        <h4 style="margin-bottom: 10px;">Parcelas de Pagamento</h4>
+                                        <div class="span12" style="margin-left: 0; margin-bottom: 15px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                                            <div class="span8" style="margin-left: 0;">
+                                                <label for="geradorParcelas">Gerar Parcelas</label>
+                                                <input type="text" class="span12" id="geradorParcelas" placeholder="Ex: 30 (30 dias) | 30 60 90 (vencimentos em 30, 60 e 90 dias) | 6x (6 parcelas a cada 30 dias)" />
+                                                <small style="color: #666; display: block; margin-top: 5px;">
+                                                    <strong>Exemplos:</strong><br>
+                                                    • <code>30</code> = 1 parcela em 30 dias<br>
+                                                    • <code>30 60 90</code> = 3 parcelas em 30, 60 e 90 dias<br>
+                                                    • <code>6x</code> = 6 parcelas iguais a cada 30 dias
+                                                </small>
+                                            </div>
+                                            <div class="span4" style="display: flex; align-items: flex-end; padding-bottom: 0;">
+                                                <button type="button" class="button btn btn-success span12" id="btnGerarParcelas" style="max-width: 100%;">
+                                                    <span class="button__icon"><i class='bx bx-calculator'></i></span>
+                                                    <span class="button__text2">Gerar</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="tabelaParcelasContainer" style="display: none;">
+                                            <div class="span12" style="margin-left: 0; margin-bottom: 10px;">
+                                                <h5>Parcelas Configuradas</h5>
+                                            </div>
+                                            <div class="span12" style="margin-left: 0; overflow-x: auto;">
+                                                <table class="table table-bordered" id="tabelaParcelas">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width="5%">Nº</th>
+                                                            <th width="15%">Dias</th>
+                                                            <th width="20%">Valor</th>
+                                                            <th width="45%">Observação</th>
+                                                            <th width="15%">Ações</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tbodyParcelas">
+                                                        <!-- Parcelas serão inseridas aqui via JavaScript -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <input type="hidden" name="parcelas_json" id="parcelas_json" value="" />
+                                        </div>
+                                    </div>
                                     <div class="span12" style="padding: 1%; margin-left: 0">
                                         <div class="span12" style="display:flex; justify-content: center;">
                                             <button class="button btn btn-success" id="btnContinuar">
@@ -150,6 +196,23 @@
                                         </div>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab7">
+                            <div class="span12 well" style="padding: 1%; margin-left: 0">
+                                <div class="span12" style="margin-left: 0; margin-bottom: 15px;">
+                                    <label for="descricao_outros"><strong>Descrição</strong> <small style="color: #666;">(Use o editor para formatar o texto)</small></label>
+                                    <textarea id="descricao_outros" name="descricao_outros" class="span12 editor" rows="6"></textarea>
+                                </div>
+                                <div class="span12" style="margin-left: 0;">
+                                    <div class="span4" style="margin-left: 0;">
+                                        <label for="preco_outros">Preço</label>
+                                        <input type="text" value="0,00" id="preco_outros" name="preco_outros" class="span12 money" />
+                                    </div>
+                                </div>
+                                <small style="color: #666; display: block; margin-top: 5px;">
+                                    <i class="bx bx-info-circle"></i> Este campo permite adicionar descrições de produtos/serviços que não estão cadastrados. Será impresso na proposta com o preço informado.
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -284,9 +347,263 @@
         $(".datepicker").datepicker({
             dateFormat: 'dd/mm/yy'
         });
+        
+        // Máscara para campo de entrada
+        $('.money').mask('#.##0,00', {reverse: true});
+        
+        // Inicializar maskMoney para campo de preço outros
+        if ($('#preco_outros').length > 0 && typeof $.fn.maskMoney !== 'undefined') {
+            $('#preco_outros').maskMoney({
+                prefix: '',
+                suffix: '',
+                decimal: ",",
+                thousands: ".",
+                allowZero: true,
+                allowNegative: false
+            });
+            if ($('#preco_outros').val() === '' || $('#preco_outros').val() === null) {
+                $('#preco_outros').val('0,00').maskMoney('mask');
+            }
+            
+            // Corrigir máscara de preço para outros produtos/serviços
+            $('#preco_outros').on('blur', function() {
+                var valor = $(this).val();
+                if (!valor || valor.trim() === '') {
+                    $(this).val('0,00').maskMoney('mask');
+                    return;
+                }
+                // Se contém ponto e não contém vírgula, pode ser formato americano
+                if (valor && valor.indexOf('.') !== -1 && valor.indexOf(',') === -1) {
+                    // Verificar se é formato americano (ex: 400.00 ou 350.00)
+                    var partes = valor.split('.');
+                    if (partes.length === 2 && partes[1].length <= 2) {
+                        // É formato decimal americano, converter
+                        var valorNum = parseFloat(valor);
+                        if (!isNaN(valorNum)) {
+                            var valorFormatado = valorNum.toLocaleString('pt-BR', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                            $(this).val(valorFormatado).maskMoney('mask');
+                        }
+                    }
+                }
+            });
+        }
+        
         $('.editor').trumbowyg({
             lang: 'pt_br',
             semantic: { 'strikethrough': 's', }
+        });
+        
+        // Variável para armazenar parcelas
+        var parcelas = [];
+        var contadorParcela = 0;
+        
+        // Função para gerar parcelas
+        $('#btnGerarParcelas').on('click', function() {
+            var input = $('#geradorParcelas').val().trim();
+            if (!input) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: 'Digite a configuração de parcelas!'
+                });
+                return;
+            }
+            
+            parcelas = [];
+            contadorParcela = 0;
+            
+            // Verificar se é formato "Nx" (ex: 6x)
+            if (/^\d+x$/i.test(input)) {
+                var numParcelas = parseInt(input.replace(/x/i, ''));
+                if (numParcelas > 0 && numParcelas <= 24) {
+                    for (var i = 1; i <= numParcelas; i++) {
+                        parcelas.push({
+                            numero: i,
+                            dias: i * 30,
+                            valor: 0,
+                            observacao: ''
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'Número de parcelas inválido! Use entre 1 e 24.'
+                    });
+                    return;
+                }
+            } else {
+                // Verificar se são números separados por espaço (ex: 30 60 90)
+                var diasArray = input.split(/\s+/).map(function(d) {
+                    return parseInt(d);
+                }).filter(function(d) {
+                    return !isNaN(d) && d > 0;
+                });
+                
+                if (diasArray.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'Formato inválido! Use: 30, 30 60 90 ou 6x'
+                    });
+                    return;
+                }
+                
+                diasArray.forEach(function(dias, index) {
+                    parcelas.push({
+                        numero: index + 1,
+                        dias: dias,
+                        valor: 0,
+                        observacao: ''
+                    });
+                });
+            }
+            
+            atualizarTabelaParcelas();
+            // Disparar evento para atualizar valores
+            $(document).trigger('parcelasGeradas');
+        });
+        
+        // Função para atualizar tabela de parcelas
+        function atualizarTabelaParcelas() {
+            var tbody = $('#tbodyParcelas');
+            tbody.empty();
+            
+            if (parcelas.length === 0) {
+                $('#tabelaParcelasContainer').hide();
+                $('#parcelas_json').val('');
+                return;
+            }
+            
+            parcelas.forEach(function(parcela, index) {
+                var row = $('<tr>');
+                row.append('<td>' + parcela.numero + '</td>');
+                row.append('<td><input type="number" class="span12 dias-parcela" data-index="' + index + '" value="' + parcela.dias + '" min="1" /></td>');
+                row.append('<td><input type="text" class="span12 money valor-parcela" data-index="' + index + '" value="' + (parcela.valor > 0 ? parcela.valor.toFixed(2).replace('.', ',') : '0,00') + '" /></td>');
+                row.append('<td><input type="text" class="span12 obs-parcela" data-index="' + index + '" value="' + (parcela.observacao || '') + '" placeholder="Observação..." /></td>');
+                row.append('<td><button type="button" class="btn btn-mini btn-danger btn-remover-parcela" data-index="' + index + '"><i class="bx bx-trash"></i></button></td>');
+                tbody.append(row);
+            });
+            
+            // Aplicar máscaras
+            $('.money').mask('#.##0,00', {reverse: true});
+            
+            // Eventos de edição
+            $('.dias-parcela').on('change', function() {
+                var index = $(this).data('index');
+                parcelas[index].dias = parseInt($(this).val()) || 0;
+                salvarParcelasJSON();
+            });
+            
+            $('.valor-parcela').on('blur', function() {
+                var index = $(this).data('index');
+                var valor = $(this).val().replace('.', '').replace(',', '.');
+                parcelas[index].valor = parseFloat(valor) || 0;
+                salvarParcelasJSON();
+            });
+            
+            $('.obs-parcela').on('blur', function() {
+                var index = $(this).data('index');
+                parcelas[index].observacao = $(this).val();
+                salvarParcelasJSON();
+            });
+            
+            $('.btn-remover-parcela').on('click', function() {
+                var index = $(this).data('index');
+                parcelas.splice(index, 1);
+                // Renumerar parcelas
+                parcelas.forEach(function(p, i) {
+                    p.numero = i + 1;
+                });
+                atualizarTabelaParcelas();
+            });
+            
+            $('#tabelaParcelasContainer').show();
+            salvarParcelasJSON();
+            adicionarBotaoAtualizar();
+        }
+        
+        // Função para salvar parcelas em JSON
+        function salvarParcelasJSON() {
+            $('#parcelas_json').val(JSON.stringify(parcelas));
+        }
+        
+        // Função para atualizar valores das parcelas automaticamente
+        function atualizarValoresParcelas() {
+            if (parcelas.length === 0) {
+                return;
+            }
+            
+            // Buscar valor total da OS
+            var valorTotal = 0;
+            
+            // Tentar obter valor total se estiver disponível
+            if ($('#valorTotal').length && $('#valorTotal').val()) {
+                var valorStr = $('#valorTotal').val().toString().replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.');
+                valorTotal = parseFloat(valorStr) || 0;
+            }
+            
+            // Se não tem valor total ainda, não atualiza (mas não mostra erro)
+            if (valorTotal <= 0) {
+                return;
+            }
+            
+            // Calcular valor por parcela (distribuição igual)
+            var valorPorParcela = valorTotal / parcelas.length;
+            
+            // Atualizar valores das parcelas
+            parcelas.forEach(function(parcela) {
+                parcela.valor = parseFloat(valorPorParcela.toFixed(2));
+            });
+            
+            // Atualizar tabela
+            atualizarTabelaParcelas();
+        }
+        
+        // Adicionar botão para atualizar valores manualmente
+        function adicionarBotaoAtualizar() {
+            if ($('#btnAtualizarValoresParcelas').length === 0 && parcelas.length > 0) {
+                var btn = $('<button type="button" class="button btn btn-info btn-mini" id="btnAtualizarValoresParcelas" style="margin-top: 10px;">' +
+                    '<span class="button__icon"><i class="bx bx-refresh"></i></span>' +
+                    '<span class="button__text2">Atualizar Valores</span></button>');
+                $('#tabelaParcelasContainer').append(btn);
+                btn.on('click', function() {
+                    atualizarValoresParcelas();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Valores Atualizados!',
+                        text: 'Os valores das parcelas foram atualizados com base no valor total da OS.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                });
+            }
+        }
+        
+        // Observar mudanças no valor total (usando MutationObserver ou eventos)
+        // No formulário de adicionar, vamos atualizar quando o usuário gerar parcelas
+        // No formulário de editar, vamos observar mudanças no #divValorTotal
+        
+        // Adicionar nova parcela manualmente
+        $(document).on('click', '#btnAdicionarParcela', function() {
+            parcelas.push({
+                numero: parcelas.length + 1,
+                dias: 30,
+                valor: 0,
+                observacao: ''
+            });
+            atualizarTabelaParcelas();
+            atualizarValoresParcelas();
+        });
+        
+        // Quando gerar parcelas, tentar atualizar valores se houver total
+        $(document).on('parcelasGeradas', function() {
+            setTimeout(function() {
+                atualizarValoresParcelas();
+            }, 500);
         });
 
         // Modal para cadastro rápido de cliente

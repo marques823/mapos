@@ -1,6 +1,7 @@
 <?php
     $totalServico  = 0;
     $totalProdutos = 0;
+    $totalOutros = 0;
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -167,8 +168,35 @@
                         </table>
                     </div>
                 <?php endif; ?>
+                
+                <?php 
+                if (isset($outros) && $outros) : ?>
+                    <div class="tabela">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="table-secondary">
+                                    <th>OUTROS PRODUTOS/SERVIÇOS</th>
+                                    <th class="text-end" width="15%">VALOR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($outros as $o) :
+                                    $totalOutros += $o->preco;
+                                    echo '<tr>';
+                                    echo '  <td>' . htmlspecialchars_decode($o->descricao) . '</td>';
+                                    echo '  <td class="text-end">R$ ' . number_format($o->preco, 2, ',', '.') . '</td>';
+                                    echo '</tr>';
+                                endforeach; ?>
+                                <tr>
+                                    <td class="text-end"><b>TOTAL OUTROS:</b></td>
+                                    <td class="text-end"><b>R$ <?= number_format($totalOutros, 2, ',', '.') ?></b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
 
-                <?php if ($totalProdutos != 0 || $totalServico != 0) : ?>
+                <?php if ($totalProdutos != 0 || $totalServico != 0 || $totalOutros > 0) : ?>
                     <div class="pagamento">
                         <div class="qrcode">
                             <?php if ($this->data['configuration']['pix_key']) : ?>
@@ -191,14 +219,16 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if ($result->valor_desconto != 0) : ?>
+                                        <?php 
+                                        $subtotalGeral = $totalProdutos + $totalServico + $totalOutros;
+                                        if ($result->valor_desconto != 0) : ?>
                                             <tr>
                                                 <td width="65%">SUBTOTAL</td>
-                                                <td>R$ <b><?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></b></td>
+                                                <td>R$ <b><?= number_format($subtotalGeral, 2, ',', '.') ?></b></td>
                                             </tr>
                                             <tr>
                                                 <td>DESCONTO</td>
-                                                <td>R$ <b><?= number_format($result->valor_desconto != 0 ? $result->valor_desconto - ($totalProdutos + $totalServico) : 0.00, 2, ',', '.') ?></b></td>
+                                                <td>R$ <b><?= number_format($result->valor_desconto != 0 ? $result->valor_desconto - $subtotalGeral : 0.00, 2, ',', '.') ?></b></td>
                                             </tr>
                                             <tr>
                                                 <td>TOTAL</td>
@@ -207,13 +237,62 @@
                                         <?php else : ?>
                                             <tr>
                                                 <td style="width:290px">TOTAL</td>
-                                                <td>R$ <?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></td>
+                                                <td>R$ <?= number_format($subtotalGeral, 2, ',', '.') ?></td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (isset($parcelas) && !empty($parcelas)) : ?>
+                    <div class="subtitle">CONDIÇÕES DE PAGAMENTO</div>
+                    <div class="tabela">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="table-secondary">
+                                    <th width="8%">Nº</th>
+                                    <th width="12%">Dias</th>
+                                    <th width="20%">Valor</th>
+                                    <th width="60%">Observação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                $totalParcelas = 0;
+                                foreach ($parcelas as $p) :
+                                    $totalParcelas += floatval($p->valor);
+                                    // Calcular data de vencimento
+                                    $dataVencimento = '';
+                                    if ($p->data_vencimento) {
+                                        $dataVencimento = date('d/m/Y', strtotime($p->data_vencimento));
+                                    } elseif ($p->dias > 0 && $result->dataFinal) {
+                                        $dataBase = new DateTime($result->dataFinal);
+                                        $dataBase->modify('+' . intval($p->dias) . ' days');
+                                        $dataVencimento = $dataBase->format('d/m/Y');
+                                    }
+                                ?>
+                                <tr>
+                                    <td style="text-align: center;"><?= $p->numero ?></td>
+                                    <td style="text-align: center;">
+                                        <?= $p->dias ?> dias
+                                        <?php if ($dataVencimento): ?>
+                                            <br><small style="color: #666;">(<?= $dataVencimento ?>)</small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="text-align: right;">R$ <?= number_format(floatval($p->valor), 2, ',', '.') ?></td>
+                                    <td><?= htmlspecialchars($p->observacao ?: '-') ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                                <tr style="background: #f8f9fa; font-weight: bold;">
+                                    <td colspan="2" style="text-align: right;">TOTAL:</td>
+                                    <td style="text-align: right;">R$ <?= number_format($totalParcelas, 2, ',', '.') ?></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 <?php endif; ?>
             </section>

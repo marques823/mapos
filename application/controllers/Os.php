@@ -133,6 +133,36 @@ class Os extends MY_Controller
 
             if (is_numeric($id = $this->os_model->add('os', $data, true))) {
                 $idOs = $id;
+                
+                // Salvar parcelas se houver
+                $parcelasJson = $this->input->post('parcelas_json');
+                if (!empty($parcelasJson)) {
+                    $parcelas = json_decode($parcelasJson, true);
+                    if (is_array($parcelas) && count($parcelas) > 0) {
+                        $this->load->model('parcelas_os_model');
+                        $this->parcelas_os_model->saveParcelas($idOs, $parcelas);
+                    }
+                }
+                
+                // Salvar outros produtos/serviços
+                $descricaoOutros = $this->input->post('descricao_outros');
+                $precoOutros = $this->input->post('preco_outros');
+                if (!empty($descricaoOutros) || !empty($precoOutros)) {
+                    $this->load->model('outros_produtos_servicos_os_model');
+                    // Converter preço de formato brasileiro (0,00) para numérico
+                    $preco = 0;
+                    if (!empty($precoOutros)) {
+                        $preco = str_replace('.', '', $precoOutros);
+                        $preco = str_replace(',', '.', $preco);
+                        $preco = floatval($preco);
+                    }
+                    
+                    $this->outros_produtos_servicos_os_model->add([
+                        'os_id' => $idOs,
+                        'descricao' => $descricaoOutros ?: '',
+                        'preco' => $preco
+                    ]);
+                }
                 $status = set_value('status');
                 
                 // Se o status inicia garantia e tem garantia definida, definir data de início
@@ -277,6 +307,47 @@ class Os extends MY_Controller
             }
 
             if ($this->os_model->edit('os', $data, 'idOs', $this->input->post('idOs')) == true) {
+                // Salvar parcelas se houver
+                $parcelasJson = $this->input->post('parcelas_json');
+                if (!empty($parcelasJson)) {
+                    $parcelas = json_decode($parcelasJson, true);
+                    if (is_array($parcelas) && count($parcelas) > 0) {
+                        $this->load->model('parcelas_os_model');
+                        $this->parcelas_os_model->saveParcelas($this->input->post('idOs'), $parcelas);
+                    }
+                }
+                
+                // Salvar outros produtos/serviços
+                $descricaoOutros = $this->input->post('descricao_outros');
+                $precoOutros = $this->input->post('preco_outros');
+                if (!empty($descricaoOutros) || !empty($precoOutros)) {
+                    $this->load->model('outros_produtos_servicos_os_model');
+                    // Converter preço de formato brasileiro (0,00) para numérico
+                    $preco = 0;
+                    if (!empty($precoOutros)) {
+                        $preco = str_replace('.', '', $precoOutros);
+                        $preco = str_replace(',', '.', $preco);
+                        $preco = floatval($preco);
+                    }
+                    
+                    // Verificar se já existe registro para esta OS
+                    $outrosExistentes = $this->outros_produtos_servicos_os_model->getByOs($this->input->post('idOs'));
+                    if (!empty($outrosExistentes) && count($outrosExistentes) > 0) {
+                        // Atualizar registro existente
+                        $this->outros_produtos_servicos_os_model->edit($outrosExistentes[0]->idOutros, [
+                            'descricao' => $descricaoOutros ?: '',
+                            'preco' => $preco
+                        ]);
+                    } else {
+                        // Criar novo registro
+                        $this->outros_produtos_servicos_os_model->add([
+                            'os_id' => $this->input->post('idOs'),
+                            'descricao' => $descricaoOutros ?: '',
+                            'preco' => $preco
+                        ]);
+                    }
+                }
+                
                 $this->load->model('mapos_model');
                 $this->load->model('usuarios_model');
 
@@ -323,6 +394,14 @@ class Os extends MY_Controller
 
         $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
         $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
+        
+        // Carregar parcelas da OS
+        $this->load->model('parcelas_os_model');
+        $this->data['parcelas'] = $this->parcelas_os_model->getByOs($this->uri->segment(3));
+        
+        // Carregar outros produtos/serviços
+        $this->load->model('outros_produtos_servicos_os_model');
+        $this->data['outros'] = $this->outros_produtos_servicos_os_model->getByOs($this->uri->segment(3));
         $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
         $this->data['anotacoes'] = $this->os_model->getAnotacoes($this->uri->segment(3));
 
@@ -527,6 +606,8 @@ class Os extends MY_Controller
         $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
         $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
         $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
+        $this->load->model('outros_produtos_servicos_os_model');
+        $this->data['outros'] = $this->outros_produtos_servicos_os_model->getByOs($this->uri->segment(3));
         $this->data['emitente'] = $this->mapos_model->getEmitente();
         if ($this->data['configuration']['pix_key']) {
             $this->data['qrCode'] = $this->os_model->getQrCode(
@@ -536,6 +617,10 @@ class Os extends MY_Controller
             );
             $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
         }
+        
+        // Carregar parcelas da OS
+        $this->load->model('parcelas_os_model');
+        $this->data['parcelas'] = $this->parcelas_os_model->getByOs($this->uri->segment(3));
 
         $this->load->view('os/imprimirProposta', $this->data);
     }
@@ -648,6 +733,113 @@ class Os extends MY_Controller
                 }
             }
         }
+    }
+
+    public function clonar()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'aOs')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para clonar OS.');
+            redirect('os');
+        }
+
+        $idOriginal = $this->uri->segment(3);
+        if (!$idOriginal || !is_numeric($idOriginal)) {
+            $this->session->set_flashdata('error', 'OS não encontrada.');
+            redirect('os');
+        }
+
+        // Buscar OS original
+        $osOriginal = $this->os_model->getById($idOriginal);
+        if (!$osOriginal) {
+            $this->session->set_flashdata('error', 'OS não encontrada.');
+            redirect('os');
+        }
+
+        // Preparar dados da nova OS (copiar tudo exceto ID e campos específicos)
+        $data = [
+            'dataInicial' => date('Y-m-d'),
+            'dataFinal' => null,
+            'garantia' => $osOriginal->garantia,
+            'descricaoProduto' => $osOriginal->descricaoProduto,
+            'defeito' => $osOriginal->defeito,
+            'observacoes' => $osOriginal->observacoes,
+            'laudoTecnico' => $osOriginal->laudoTecnico,
+            'clientes_id' => $osOriginal->clientes_id,
+            'usuarios_id' => $this->session->userdata('id_admin'),
+            'status' => 'Aberto', // Sempre começar como "Aberto" ao clonar
+            'faturado' => 0,
+            'valorTotal' => $osOriginal->valorTotal,
+            'desconto' => $osOriginal->desconto,
+            'valor_desconto' => $osOriginal->valor_desconto,
+            'tipo_desconto' => $osOriginal->tipo_desconto,
+            'forma_pgto' => $osOriginal->forma_pgto,
+            'parcelas' => $osOriginal->parcelas,
+            'valor_entrada' => $osOriginal->valor_entrada,
+            'lancamento' => null, // Não copiar lançamento financeiro
+        ];
+
+        // Criar nova OS
+        $idNovaOs = $this->os_model->add('os', $data, true);
+        
+        if (!$idNovaOs) {
+            $this->session->set_flashdata('error', 'Erro ao clonar OS.');
+            redirect('os');
+        }
+
+        // Copiar produtos
+        $produtos = $this->os_model->getProdutos($idOriginal);
+        foreach ($produtos as $produto) {
+            $this->db->insert('produtos_os', [
+                'idOs' => $idNovaOs,
+                'idProduto' => $produto->idProduto,
+                'quantidade' => $produto->quantidade,
+                'preco' => $produto->preco,
+            ]);
+        }
+
+        // Copiar serviços
+        $servicos = $this->os_model->getServicos($idOriginal);
+        foreach ($servicos as $servico) {
+            $this->db->insert('servicos_os', [
+                'idOs' => $idNovaOs,
+                'idServico' => $servico->idServico,
+                'quantidade' => $servico->quantidade,
+                'preco' => $servico->preco,
+            ]);
+        }
+
+        // Copiar parcelas
+        $this->load->model('parcelas_os_model');
+        $parcelas = $this->parcelas_os_model->getByOs($idOriginal);
+        foreach ($parcelas as $parcela) {
+            $this->db->insert('parcelas_os', [
+                'os_id' => $idNovaOs,
+                'numero' => $parcela->numero,
+                'valor' => $parcela->valor,
+                'data_vencimento' => $parcela->data_vencimento,
+                'dias' => $parcela->dias,
+                'forma_pgto' => $parcela->forma_pgto,
+                'conta_id' => $parcela->conta_id,
+                'observacao' => $parcela->observacao,
+                'detalhes' => $parcela->detalhes,
+            ]);
+        }
+
+        // Copiar outros produtos/serviços
+        $this->load->model('outros_produtos_servicos_os_model');
+        $outros = $this->outros_produtos_servicos_os_model->getByOs($idOriginal);
+        foreach ($outros as $outro) {
+            $this->db->insert('outros_produtos_servicos_os', [
+                'os_id' => $idNovaOs,
+                'descricao' => $outro->descricao,
+                'preco' => $outro->preco,
+                'ordem' => $outro->ordem,
+            ]);
+        }
+
+        log_info('Clonou OS #' . $idOriginal . ' para OS #' . $idNovaOs);
+        $this->session->set_flashdata('success', 'OS clonada com sucesso!');
+        redirect('os/editar/' . $idNovaOs);
     }
 
     public function excluir()
@@ -1129,6 +1321,153 @@ class Os extends MY_Controller
                     'result' => false,
                     'message' => $error_message
                 ]));
+        }
+    }
+
+    public function adicionarOutros()
+    {
+        $os_id = $this->input->post('idOsOutros');
+        $descricao = $this->input->post('descricao');
+        $preco = $this->input->post('preco');
+        
+        if (empty($os_id) || !is_numeric($os_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['result' => false, 'message' => 'ID da OS inválido']));
+        }
+        
+        if (empty(trim($descricao))) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['result' => false, 'message' => 'Descrição é obrigatória']));
+        }
+        
+        // Converter preço de formato brasileiro (0,00) para numérico
+        if (!empty($preco)) {
+            $preco = str_replace('.', '', $preco);
+            $preco = str_replace(',', '.', $preco);
+        }
+        
+        if (empty($preco) || !is_numeric($preco) || floatval($preco) <= 0) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['result' => false, 'message' => 'Preço é obrigatório e deve ser maior que zero']));
+        }
+        
+        $this->load->model('outros_produtos_servicos_os_model');
+        
+        $data = [
+            'os_id' => $os_id,
+            'descricao' => $descricao,
+            'preco' => floatval($preco)
+        ];
+        
+        if ($this->outros_produtos_servicos_os_model->add($data)) {
+            log_info('Adicionou outros produtos/serviços à OS. ID (OS): ' . $os_id);
+            
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(['result' => true, 'message' => 'Item adicionado com sucesso!']));
+        } else {
+            $error = $this->db->error();
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode([
+                    'result' => false,
+                    'message' => 'Erro ao adicionar item: ' . ($error['message'] ?? 'Erro desconhecido')
+                ]));
+        }
+    }
+    
+    public function editarOutros()
+    {
+        $id = $this->input->post('idOutros');
+        $os_id = $this->input->post('idOsOutros');
+        $descricao = $this->input->post('descricao');
+        $preco = $this->input->post('preco');
+        
+        if (empty($id) || !is_numeric($id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['result' => false, 'message' => 'ID inválido']));
+        }
+        
+        if (empty($os_id) || !is_numeric($os_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['result' => false, 'message' => 'ID da OS inválido']));
+        }
+        
+        if (empty(trim($descricao))) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['result' => false, 'message' => 'Descrição é obrigatória']));
+        }
+        
+        // Converter preço de formato brasileiro (0,00) para numérico
+        if (!empty($preco)) {
+            $preco = str_replace('.', '', $preco);
+            $preco = str_replace(',', '.', $preco);
+        }
+        
+        if (empty($preco) || !is_numeric($preco) || floatval($preco) <= 0) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['result' => false, 'message' => 'Preço é obrigatório e deve ser maior que zero']));
+        }
+        
+        $this->load->model('outros_produtos_servicos_os_model');
+        
+        $data = [
+            'descricao' => $descricao,
+            'preco' => floatval($preco)
+        ];
+        
+        if ($this->outros_produtos_servicos_os_model->edit($id, $data)) {
+            log_info('Editou outros produtos/serviços da OS. ID (OS): ' . $os_id . ', ID (Item): ' . $id);
+            
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(['result' => true, 'message' => 'Item atualizado com sucesso!']));
+        } else {
+            $error = $this->db->error();
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode([
+                    'result' => false,
+                    'message' => 'Erro ao atualizar item: ' . ($error['message'] ?? 'Erro desconhecido')
+                ]));
+        }
+    }
+    
+    public function excluirOutros()
+    {
+        $id = $this->input->post('id');
+        $idOs = $this->input->post('idOs');
+        
+        if (empty($id) || !is_numeric($id)) {
+            echo json_encode(['result' => false, 'message' => 'ID inválido']);
+            return;
+        }
+        
+        $this->load->model('outros_produtos_servicos_os_model');
+        
+        if ($this->outros_produtos_servicos_os_model->delete($id)) {
+            log_info('Removeu outros produtos/serviços da OS. ID (OS): ' . $idOs);
+            echo json_encode(['result' => true, 'message' => 'Item excluído com sucesso!']);
+        } else {
+            echo json_encode(['result' => false, 'message' => 'Erro ao excluir item']);
         }
     }
 
@@ -1761,6 +2100,20 @@ class Os extends MY_Controller
 
         if ($this->os_model->edit('os', $data, 'idOs', $idOs) == true) {
             log_info('Atualizou status da OS. ID: ' . $idOs . ' | Novo status: ' . $novoStatus);
+            
+            // Gerar lançamento automático se mudou para Finalizado ou Faturado
+            if (($novoStatus === 'Finalizado' || $novoStatus === 'Faturado') && 
+                ($statusAntigo !== 'Finalizado' && $statusAntigo !== 'Faturado')) {
+                
+                // Verificar se já tem lançamento vinculado
+                if (empty($os->lancamento)) {
+                    // Verificar se tem forma de pagamento configurada
+                    if (!empty($os->forma_pgto)) {
+                        $this->gerarLancamentoAutomatico($idOs);
+                    }
+                }
+            }
+            
             $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode(['result' => true, 'message' => 'Status atualizado com sucesso!']));
@@ -1839,5 +2192,617 @@ class Os extends MY_Controller
 
         log_info("Total de produtos com estoque devolvido: {$produtosProcessados}. OS: {$idOs}");
         return true;
+    }
+
+    /**
+     * Gera lançamento financeiro usando parcelas configuradas
+     */
+    public function gerarLancamentoParcelas()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'eOs')) {
+            echo json_encode(['result' => false, 'message' => 'Você não tem permissão']);
+            return;
+        }
+
+        $idOs = $this->input->post('idOs');
+        $parcelasJson = $this->input->post('parcelas');
+        $criarLancamento = $this->input->post('criar_lancamento');
+
+        if (!$idOs) {
+            echo json_encode(['result' => false, 'message' => 'ID da OS inválido']);
+            return;
+        }
+
+        // Buscar OS
+        $os = $this->os_model->getById($idOs);
+        if (!$os) {
+            echo json_encode(['result' => false, 'message' => 'OS não encontrada']);
+            return;
+        }
+
+        // Verificar se já tem lançamento vinculado
+        if (!empty($os->lancamento)) {
+            echo json_encode(['result' => false, 'message' => 'Esta OS já possui um lançamento financeiro vinculado']);
+            return;
+        }
+
+        // Decodificar parcelas
+        $parcelas = json_decode($parcelasJson, true);
+        if (!is_array($parcelas) || count($parcelas) === 0) {
+            echo json_encode(['result' => false, 'message' => 'Nenhuma parcela configurada']);
+            return;
+        }
+
+        // Se não deve criar lançamento, apenas atualizar parcelas e retornar
+        if (!$criarLancamento || $criarLancamento == '0') {
+            $this->load->model('parcelas_os_model');
+            $this->parcelas_os_model->saveParcelas($idOs, $parcelas);
+            echo json_encode(['result' => true, 'message' => 'OS atualizada. Lançamento não criado.']);
+            return;
+        }
+
+        $this->load->model('financeiro_model');
+        $this->load->model('pagamentos_parciais_model');
+        $lancamentosIds = [];
+
+        // Verificar se o status é "Faturado" (NF emitida = pagamento automático)
+        $statusFaturado = ($os->status === 'Faturado');
+
+        foreach ($parcelas as $parcela) {
+            // Converter data de vencimento
+            $dataVencimento = date('Y-m-d');
+            if (!empty($parcela['data_vencimento'])) {
+                if (strpos($parcela['data_vencimento'], '/') !== false) {
+                    $dataParts = explode('/', $parcela['data_vencimento']);
+                    if (count($dataParts) == 3) {
+                        $dataVencimento = $dataParts[2] . '-' . $dataParts[1] . '-' . $dataParts[0];
+                    }
+                } else {
+                    $dataVencimento = $parcela['data_vencimento'];
+                }
+            } elseif (!empty($parcela['dias']) && $parcela['dias'] > 0) {
+                $dataVencimento = date('Y-m-d', strtotime('+' . intval($parcela['dias']) . ' days'));
+            }
+
+            $valor = floatval($parcela['valor']) ?: 0;
+            if ($valor <= 0) {
+                continue; // Pular parcelas sem valor
+            }
+
+            // Se status é "Faturado", registrar pagamento automaticamente
+            if ($statusFaturado) {
+                $statusPagamento = 'pago';
+                $valorPago = $valor;
+                $baixado = 1;
+                $dataPagamento = $dataVencimento; // Usar data de vencimento como data de pagamento
+            } else {
+                // Determinar status (se já está pago ou pendente)
+                $statusPagamento = (isset($parcela['status']) && $parcela['status'] === 'pago') ? 'pago' : 'pendente';
+                $valorPago = ($statusPagamento === 'pago') ? $valor : 0;
+                $baixado = ($statusPagamento === 'pago') ? 1 : 0;
+                // Se está pago, a data de pagamento é a data de vencimento
+                $dataPagamento = ($statusPagamento === 'pago') ? $dataVencimento : null;
+            }
+
+            $dataLancamento = [
+                'descricao' => 'OS #' . $idOs . ' - Parcela ' . $parcela['numero'] . ' - ' . htmlspecialchars($os->nomeCliente),
+                'valor' => $valor,
+                'valor_desconto' => $valor,
+                'valor_pago' => $valorPago,
+                'status_pagamento' => $statusPagamento,
+                'desconto' => 0,
+                'tipo_desconto' => 'real',
+                'data_vencimento' => $dataVencimento,
+                'data_pagamento' => $dataPagamento,
+                'baixado' => $baixado,
+                'cliente_fornecedor' => $os->nomeCliente,
+                'clientes_id' => $os->clientes_id,
+                'forma_pgto' => $parcela['forma_pgto'] ?? '',
+                'tipo' => 'receita',
+                'observacoes' => (!empty($parcela['observacao']) ? $parcela['observacao'] . ' - ' : '') . 
+                                'Referente à OS #' . $idOs,
+                'usuarios_id' => $this->session->userdata('id_admin')
+            ];
+            
+            // Adicionar conta bancária se fornecida
+            if (isset($parcela['conta_id']) && !empty($parcela['conta_id'])) {
+                $dataLancamento['contas_id'] = $parcela['conta_id'];
+            }
+            
+            $this->financeiro_model->add('lancamentos', $dataLancamento);
+            $lancamentoId = $this->db->insert_id();
+            $lancamentosIds[] = $lancamentoId;
+            
+            // Se status é "Faturado", registrar pagamento parcial automaticamente
+            if ($statusFaturado && $lancamentoId) {
+                $dataPagamentoParcial = [
+                    'lancamentos_id' => $lancamentoId,
+                    'valor' => $valor,
+                    'data_pagamento' => $dataPagamento,
+                    'forma_pgto' => $parcela['forma_pgto'] ?? '',
+                    'observacao' => 'Pagamento automático - NF emitida (OS #' . $idOs . ')',
+                    'usuarios_id' => $this->session->userdata('id_admin')
+                ];
+                
+                $this->pagamentos_parciais_model->add($dataPagamentoParcial);
+                log_info('Registrou pagamento automático de R$ ' . number_format($valor, 2, ',', '.') . ' para lançamento #' . $lancamentoId . ' (OS #' . $idOs . ' - Status: Faturado)');
+            }
+        }
+
+        // Atualizar parcelas na tabela parcelas_os com dados finais
+        $this->load->model('parcelas_os_model');
+        $this->parcelas_os_model->saveParcelas($idOs, $parcelas);
+
+        // Vincular primeiro lançamento à OS
+        if (!empty($lancamentosIds)) {
+            $this->os_model->edit('os', ['lancamento' => $lancamentosIds[0]], 'idOs', $idOs);
+        }
+
+        log_info('Gerou lançamento financeiro para OS #' . $idOs . ' usando parcelas. Lançamentos: ' . implode(', ', $lancamentosIds));
+        
+        if ($statusFaturado) {
+            log_info('Pagamentos automáticos registrados para OS #' . $idOs . ' (Status: Faturado - NF emitida)');
+        }
+
+        $mensagem = count($lancamentosIds) . ' lançamento(s) criado(s) com sucesso!';
+        if ($statusFaturado) {
+            $mensagem .= ' Pagamentos registrados automaticamente (NF emitida).';
+        }
+        echo json_encode(['result' => true, 'message' => $mensagem, 'lancamentos' => $lancamentosIds]);
+    }
+
+    /**
+     * Gera lançamento financeiro a partir de uma OS (método antigo - mantido para compatibilidade)
+     */
+    public function gerarLancamento()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'eOs')) {
+            echo json_encode(['result' => false, 'message' => 'Você não tem permissão']);
+            return;
+        }
+
+        $idOs = $this->input->post('idOs');
+        $formaPgto = $this->input->post('forma_pgto');
+        $parcelas = intval($this->input->post('parcelas')) ?: 1;
+        $entrada = floatval(str_replace(',', '.', $this->input->post('entrada'))) ?: 0;
+        $dataVencimento = $this->input->post('data_vencimento');
+        $criarLancamento = $this->input->post('criar_lancamento');
+
+        if (!$idOs) {
+            echo json_encode(['result' => false, 'message' => 'ID da OS inválido']);
+            return;
+        }
+
+        // Buscar OS
+        $os = $this->os_model->getById($idOs);
+        if (!$os) {
+            echo json_encode(['result' => false, 'message' => 'OS não encontrada']);
+            return;
+        }
+
+        // Verificar se já tem lançamento vinculado
+        if (!empty($os->lancamento)) {
+            echo json_encode(['result' => false, 'message' => 'Esta OS já possui um lançamento financeiro vinculado']);
+            return;
+        }
+
+        // Calcular valor total
+        $produtos = $this->os_model->getProdutos($idOs);
+        $servicos = $this->os_model->getServicos($idOs);
+        
+        $totalProdutos = 0;
+        $totalServicos = 0;
+        
+        foreach ($produtos as $p) {
+            $totalProdutos += $p->preco * $p->quantidade;
+        }
+        foreach ($servicos as $s) {
+            $totalServicos += $s->preco * $s->quantidade;
+        }
+        
+        $valorTotal = $totalProdutos + $totalServicos;
+        
+        if ($valorTotal <= 0) {
+            echo json_encode(['result' => false, 'message' => 'Valor total da OS é zero']);
+            return;
+        }
+
+        // Converter data de vencimento
+        if ($dataVencimento) {
+            $dataParts = explode('/', $dataVencimento);
+            if (count($dataParts) == 3) {
+                $dataVencimento = $dataParts[2] . '-' . $dataParts[1] . '-' . $dataParts[0];
+            } else {
+                $dataVencimento = date('Y-m-d');
+            }
+        } else {
+            $dataVencimento = date('Y-m-d');
+        }
+
+        // Atualizar OS com dados de pagamento
+        $dataOs = [
+            'forma_pgto' => $formaPgto,
+            'parcelas' => $parcelas,
+            'valor_entrada' => $entrada,
+            'faturado' => 1
+        ];
+        $this->os_model->edit('os', $dataOs, 'idOs', $idOs);
+
+        // Se não deve criar lançamento, apenas retornar sucesso
+        if (!$criarLancamento || $criarLancamento == '0') {
+            echo json_encode(['result' => true, 'message' => 'OS atualizada. Lançamento não criado.']);
+            return;
+        }
+
+        $this->load->model('financeiro_model');
+        $lancamentosIds = [];
+
+        // Se tem entrada, criar lançamento de entrada como pago
+        if ($entrada > 0) {
+            $dataEntrada = [
+                'descricao' => 'Entrada - OS #' . $idOs . ' - ' . htmlspecialchars($os->nomeCliente),
+                'valor' => $entrada,
+                'valor_desconto' => $entrada,
+                'valor_pago' => $entrada,
+                'status_pagamento' => 'pago',
+                'desconto' => 0,
+                'tipo_desconto' => 'real',
+                'data_vencimento' => date('Y-m-d'),
+                'data_pagamento' => date('Y-m-d'),
+                'baixado' => 1,
+                'cliente_fornecedor' => $os->nomeCliente,
+                'clientes_id' => $os->clientes_id,
+                'forma_pgto' => $formaPgto,
+                'tipo' => 'receita',
+                'observacoes' => 'Entrada referente à OS #' . $idOs,
+                'usuarios_id' => $this->session->userdata('id_admin')
+            ];
+            
+            $this->financeiro_model->add('lancamentos', $dataEntrada);
+            $lancamentosIds[] = $this->db->insert_id();
+        }
+
+        // Calcular valor restante após entrada
+        $valorRestante = $valorTotal - $entrada;
+
+        if ($valorRestante > 0) {
+            if ($parcelas > 1) {
+                // Criar parcelas
+                $valorParcela = $valorRestante / $parcelas;
+                
+                for ($i = 1; $i <= $parcelas; $i++) {
+                    $dataVencimentoParcela = date('Y-m-d', strtotime($dataVencimento . ' + ' . ($i - 1) . ' months'));
+                    
+                    $dataParcela = [
+                        'descricao' => 'OS #' . $idOs . ' - Parcela ' . $i . '/' . $parcelas . ' - ' . htmlspecialchars($os->nomeCliente),
+                        'valor' => round($valorParcela, 2),
+                        'valor_desconto' => round($valorParcela, 2),
+                        'valor_pago' => 0,
+                        'status_pagamento' => 'pendente',
+                        'desconto' => 0,
+                        'tipo_desconto' => 'real',
+                        'data_vencimento' => $dataVencimentoParcela,
+                        'data_pagamento' => null,
+                        'baixado' => 0,
+                        'cliente_fornecedor' => $os->nomeCliente,
+                        'clientes_id' => $os->clientes_id,
+                        'forma_pgto' => $formaPgto,
+                        'tipo' => 'receita',
+                        'observacoes' => 'Parcela ' . $i . '/' . $parcelas . ' referente à OS #' . $idOs,
+                        'usuarios_id' => $this->session->userdata('id_admin')
+                    ];
+                    
+                    $this->financeiro_model->add('lancamentos', $dataParcela);
+                    $lancamentosIds[] = $this->db->insert_id();
+                }
+            } else {
+                // Lançamento único
+                $dataLancamento = [
+                    'descricao' => 'OS #' . $idOs . ' - ' . htmlspecialchars($os->nomeCliente),
+                    'valor' => $valorRestante,
+                    'valor_desconto' => $valorRestante,
+                    'valor_pago' => 0,
+                    'status_pagamento' => 'pendente',
+                    'desconto' => 0,
+                    'tipo_desconto' => 'real',
+                    'data_vencimento' => $dataVencimento,
+                    'data_pagamento' => null,
+                    'baixado' => 0,
+                    'cliente_fornecedor' => $os->nomeCliente,
+                    'clientes_id' => $os->clientes_id,
+                    'forma_pgto' => $formaPgto,
+                    'tipo' => 'receita',
+                    'observacoes' => 'Referente à OS #' . $idOs,
+                    'usuarios_id' => $this->session->userdata('id_admin')
+                ];
+                
+                $this->financeiro_model->add('lancamentos', $dataLancamento);
+                $lancamentosIds[] = $this->db->insert_id();
+            }
+        }
+
+        // Vincular primeiro lançamento à OS
+        if (!empty($lancamentosIds)) {
+            $this->os_model->edit('os', ['lancamento' => $lancamentosIds[0]], 'idOs', $idOs);
+        }
+
+        log_info('Gerou lançamento financeiro para OS #' . $idOs . '. Lançamentos: ' . implode(', ', $lancamentosIds));
+
+        $mensagem = 'Lançamento(s) criado(s) com sucesso!';
+        if ($entrada > 0) {
+            $mensagem .= ' Entrada: R$ ' . number_format($entrada, 2, ',', '.');
+        }
+        if ($parcelas > 1) {
+            $mensagem .= ' ' . $parcelas . ' parcelas de R$ ' . number_format($valorRestante / $parcelas, 2, ',', '.');
+        }
+
+        echo json_encode(['result' => true, 'message' => $mensagem, 'lancamentos' => $lancamentosIds]);
+    }
+
+    /**
+     * Gera lançamento financeiro automaticamente usando dados já salvos na OS
+     * Chamado quando a OS muda para Finalizado ou Faturado
+     */
+    private function gerarLancamentoAutomatico($idOs)
+    {
+        // Buscar OS
+        $os = $this->os_model->getById($idOs);
+        if (!$os) {
+            log_info("Erro ao gerar lançamento automático: OS #{$idOs} não encontrada");
+            return false;
+        }
+
+        // Verificar se já tem lançamento
+        if (!empty($os->lancamento)) {
+            log_info("OS #{$idOs} já possui lançamento vinculado. Pulando geração automática.");
+            return false;
+        }
+
+        // Verificar se tem parcelas configuradas ou forma de pagamento (compatibilidade)
+        $this->load->model('parcelas_os_model');
+        $parcelasConfiguradas = $this->parcelas_os_model->getByOs($idOs);
+        
+        if (empty($parcelasConfiguradas) && empty($os->forma_pgto)) {
+            log_info("OS #{$idOs} não possui parcelas ou forma de pagamento configurada. Pulando geração automática.");
+            return false;
+        }
+
+        // Calcular valor total
+        $produtos = $this->os_model->getProdutos($idOs);
+        $servicos = $this->os_model->getServicos($idOs);
+        
+        $totalProdutos = 0;
+        $totalServicos = 0;
+        
+        foreach ($produtos as $p) {
+            $totalProdutos += $p->preco * $p->quantidade;
+        }
+        foreach ($servicos as $s) {
+            $totalServicos += $s->preco * $s->quantidade;
+        }
+        
+        $valorTotal = $totalProdutos + $totalServicos;
+        
+        if ($valorTotal <= 0) {
+            log_info("OS #{$idOs} tem valor total zero. Pulando geração automática.");
+            return false;
+        }
+
+        // Buscar parcelas configuradas
+        $this->load->model('parcelas_os_model');
+        $parcelasConfiguradas = $this->parcelas_os_model->getByOs($idOs);
+        
+        $this->load->model('financeiro_model');
+        $this->load->model('pagamentos_parciais_model');
+        $lancamentosIds = [];
+        
+        // Verificar se o status é "Faturado" (NF emitida = pagamento automático)
+        $statusFaturado = ($os->status === 'Faturado');
+        
+        // Se tem parcelas configuradas, usar elas
+        if (!empty($parcelasConfiguradas) && count($parcelasConfiguradas) > 0) {
+            foreach ($parcelasConfiguradas as $parcela) {
+                $valor = floatval($parcela->valor) ?: 0;
+                if ($valor <= 0) {
+                    continue; // Pular parcelas sem valor
+                }
+                
+                // Usar data de vencimento da parcela ou calcular baseado em dias
+                $dataVencimento = date('Y-m-d');
+                if (!empty($parcela->data_vencimento)) {
+                    $dataVencimento = $parcela->data_vencimento;
+                } elseif (!empty($parcela->dias) && $parcela->dias > 0) {
+                    $dataVencimento = date('Y-m-d', strtotime('+' . intval($parcela->dias) . ' days'));
+                }
+                
+                // Se status é "Faturado", registrar pagamento automaticamente
+                if ($statusFaturado) {
+                    $statusPagamento = 'pago';
+                    $valorPago = $valor;
+                    $baixado = 1;
+                    $dataPagamento = $dataVencimento; // Usar data de vencimento como data de pagamento
+                } else {
+                    // Determinar status
+                    $statusPagamento = ($parcela->status === 'pago') ? 'pago' : 'pendente';
+                    $valorPago = ($statusPagamento === 'pago') ? $valor : 0;
+                    $baixado = ($statusPagamento === 'pago') ? 1 : 0;
+                    $dataPagamento = ($statusPagamento === 'pago') ? date('Y-m-d') : null;
+                }
+                
+                $dataLancamento = [
+                    'descricao' => 'OS #' . $idOs . ' - Parcela ' . $parcela->numero . ' - ' . htmlspecialchars($os->nomeCliente),
+                    'valor' => $valor,
+                    'valor_desconto' => $valor,
+                    'valor_pago' => $valorPago,
+                    'status_pagamento' => $statusPagamento,
+                    'desconto' => 0,
+                    'tipo_desconto' => 'real',
+                    'data_vencimento' => $dataVencimento,
+                    'data_pagamento' => $dataPagamento,
+                    'baixado' => $baixado,
+                    'cliente_fornecedor' => $os->nomeCliente,
+                    'clientes_id' => $os->clientes_id,
+                    'forma_pgto' => $parcela->forma_pgto ?? '',
+                    'tipo' => 'receita',
+                    'observacoes' => (!empty($parcela->observacao) ? $parcela->observacao . ' - ' : '') . 
+                                    (!empty($parcela->detalhes) ? 'Detalhes: ' . $parcela->detalhes . ' - ' : '') . 
+                                    'Referente à OS #' . $idOs,
+                    'usuarios_id' => $this->session->userdata('id_admin')
+                ];
+                
+                // Adicionar conta bancária se fornecida
+                if (isset($parcela->conta_id) && !empty($parcela->conta_id)) {
+                    $dataLancamento['contas_id'] = $parcela->conta_id;
+                }
+                
+                $this->financeiro_model->add('lancamentos', $dataLancamento);
+                $lancamentoId = $this->db->insert_id();
+                $lancamentosIds[] = $lancamentoId;
+                
+                // Se status é "Faturado", registrar pagamento parcial automaticamente
+                if ($statusFaturado && $lancamentoId) {
+                    $dataPagamentoParcial = [
+                        'lancamentos_id' => $lancamentoId,
+                        'valor' => $valor,
+                        'data_pagamento' => $dataPagamento,
+                        'forma_pgto' => $parcela->forma_pgto ?? '',
+                        'observacao' => 'Pagamento automático - NF emitida (OS #' . $idOs . ')',
+                        'usuarios_id' => $this->session->userdata('id_admin')
+                    ];
+                    
+                    $this->pagamentos_parciais_model->add($dataPagamentoParcial);
+                    log_info('Registrou pagamento automático de R$ ' . number_format($valor, 2, ',', '.') . ' para lançamento #' . $lancamentoId . ' (OS #' . $idOs . ' - Status: Faturado)');
+                }
+            }
+        } else {
+            // Se não tem parcelas configuradas, criar lançamento único (compatibilidade)
+            // Se status é "Faturado", registrar pagamento automaticamente
+            if ($statusFaturado) {
+                $statusPagamento = 'pago';
+                $valorPago = $valorTotal;
+                $baixado = 1;
+                $dataPagamento = date('Y-m-d');
+            } else {
+                $statusPagamento = 'pendente';
+                $valorPago = 0;
+                $baixado = 0;
+                $dataPagamento = null;
+            }
+            
+            $dataLancamento = [
+                'descricao' => 'OS #' . $idOs . ' - ' . htmlspecialchars($os->nomeCliente),
+                'valor' => $valorTotal,
+                'valor_desconto' => $valorTotal,
+                'valor_pago' => $valorPago,
+                'status_pagamento' => $statusPagamento,
+                'desconto' => 0,
+                'tipo_desconto' => 'real',
+                'data_vencimento' => date('Y-m-d'),
+                'data_pagamento' => $dataPagamento,
+                'baixado' => $baixado,
+                'cliente_fornecedor' => $os->nomeCliente,
+                'clientes_id' => $os->clientes_id,
+                'forma_pgto' => $os->forma_pgto ?? '',
+                'tipo' => 'receita',
+                'observacoes' => 'Referente à OS #' . $idOs,
+                'usuarios_id' => $this->session->userdata('id_admin')
+            ];
+            
+            $this->financeiro_model->add('lancamentos', $dataLancamento);
+            $lancamentoId = $this->db->insert_id();
+            $lancamentosIds[] = $lancamentoId;
+            
+            // Se status é "Faturado", registrar pagamento parcial automaticamente
+            if ($statusFaturado && $lancamentoId) {
+                $dataPagamentoParcial = [
+                    'lancamentos_id' => $lancamentoId,
+                    'valor' => $valorTotal,
+                    'data_pagamento' => $dataPagamento,
+                    'forma_pgto' => $os->forma_pgto ?? '',
+                    'observacao' => 'Pagamento automático - NF emitida (OS #' . $idOs . ')',
+                    'usuarios_id' => $this->session->userdata('id_admin')
+                ];
+                
+                $this->pagamentos_parciais_model->add($dataPagamentoParcial);
+                log_info('Registrou pagamento automático de R$ ' . number_format($valorTotal, 2, ',', '.') . ' para lançamento #' . $lancamentoId . ' (OS #' . $idOs . ' - Status: Faturado)');
+            }
+        }
+
+        // Vincular primeiro lançamento à OS
+        if (!empty($lancamentosIds)) {
+            $this->os_model->edit('os', ['lancamento' => $lancamentosIds[0]], 'idOs', $idOs);
+        }
+
+        log_info('Gerou lançamento financeiro automático para OS #' . $idOs . '. Lançamentos: ' . implode(', ', $lancamentosIds));
+        
+        if ($statusFaturado) {
+            log_info('Pagamentos automáticos registrados para OS #' . $idOs . ' (Status: Faturado - NF emitida)');
+        }
+        
+        return true;
+    }
+
+    /**
+     * Retorna dados da OS para o modal de faturamento
+     */
+    /**
+     * Retorna dados da OS para o modal de faturamento
+     * Inclui parcelas se existirem
+     */
+    public function getDadosOsJson($idOs)
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
+            echo json_encode(['result' => false, 'message' => 'Sem permissão']);
+            return;
+        }
+
+        $os = $this->os_model->getById($idOs);
+        if (!$os) {
+            echo json_encode(['result' => false, 'message' => 'OS não encontrada']);
+            return;
+        }
+
+        $produtos = $this->os_model->getProdutos($idOs);
+        $servicos = $this->os_model->getServicos($idOs);
+        
+        $totalProdutos = 0;
+        $totalServicos = 0;
+        
+        foreach ($produtos as $p) {
+            $totalProdutos += $p->preco * $p->quantidade;
+        }
+        foreach ($servicos as $s) {
+            $totalServicos += $s->preco * $s->quantidade;
+        }
+        
+        $valorTotal = $totalProdutos + $totalServicos;
+
+        // Buscar parcelas da OS
+        $this->load->model('parcelas_os_model');
+        $parcelas = $this->parcelas_os_model->getByOs($idOs);
+        
+        // Preparar parcelas para JSON
+        $parcelasArray = [];
+        foreach ($parcelas as $p) {
+            $parcelasArray[] = [
+                'id' => $p->idParcela,
+                'numero' => intval($p->numero),
+                'dias' => intval($p->dias),
+                'valor' => floatval($p->valor),
+                'observacao' => $p->observacao ?? '',
+                'data_vencimento' => $p->data_vencimento,
+                'forma_pgto' => $p->forma_pgto ?? '',
+                'detalhes' => $p->detalhes ?? '',
+                'status' => $p->status ?? 'pendente'
+            ];
+        }
+
+        echo json_encode([
+            'result' => true,
+            'os' => $os,
+            'valorTotal' => $valorTotal,
+            'temLancamento' => !empty($os->lancamento),
+            'parcelas' => $parcelasArray
+        ]);
     }
 }

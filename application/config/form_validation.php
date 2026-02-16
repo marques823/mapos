@@ -453,4 +453,65 @@ $config = [
             'rules' => 'required|trim',
         ],
     ],
+    'categorias' => [
+        [
+            'field' => 'categoria',
+            'label' => 'Categoria',
+            'rules' => 'required|trim|max_length[80]',
+        ],
+        [
+            'field' => 'tipo',
+            'label' => 'Tipo',
+            'rules' => 'required|in_list[receita,despesa]',
+        ],
+    ],
+    'contas' => [
+        [
+            'field' => 'conta',
+            'label' => 'Nome da Conta',
+            'rules' => 'required|trim|max_length[45]',
+        ],
+        [
+            'field' => 'banco',
+            'label' => 'Banco',
+            'rules' => 'trim|max_length[45]',
+        ],
+        [
+            'field' => 'numero',
+            'label' => 'Número da Conta',
+            'rules' => 'trim|max_length[45]',
+        ],
+        [
+            'field' => 'tipo',
+            'label' => 'Tipo',
+            'rules' => 'trim|max_length[80]',
+        ],
+        [
+            'field' => 'saldo',
+            'label' => 'Saldo Inicial',
+            'rules' => 'trim',
+        ],
+    ],
+    'propostas' => [
+        [
+            'field' => 'cliente',
+            'label' => 'Cliente',
+            'rules' => 'required|trim',
+        ],
+        [
+            'field' => 'usuarios_id',
+            'label' => 'Vendedor/Responsável',
+            'rules' => 'required|integer',
+        ],
+        [
+            'field' => 'data_proposta',
+            'label' => 'Data da Proposta',
+            'rules' => 'required',
+        ],
+        [
+            'field' => 'status',
+            'label' => 'Status',
+            'rules' => 'trim',
+        ],
+    ],
 ];

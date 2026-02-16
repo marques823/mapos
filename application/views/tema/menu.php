@@ -95,6 +95,17 @@
                     </li>
                 <?php } ?>
 
+                <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vPropostas')) { ?>
+                    <li class="<?php if (isset($menuPropostas)) {
+                        echo 'active';
+                    }; ?>">
+                        <a class="tip-bottom" title="" href="<?= site_url('propostas') ?>"><i class='bx bx-clipboard iconX'></i>
+                            <span class="title">Propostas Comerciais</span>
+                            <span class="title-tooltip">Propostas</span>
+                        </a>
+                    </li>
+                <?php } ?>
+
                 <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vGarantia')) { ?>
                     <li class="<?php if (isset($menuGarantia)) {
                         echo 'active';
@@ -129,12 +140,36 @@
                 <?php } ?>
 
                 <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vLancamento')) { ?>
+                    <li class="<?php if (isset($menuDashboard)) {
+                        echo 'active';
+                    }; ?>">
+                        <a class="tip-bottom" title="" href="<?= site_url('financeiro/dashboard') ?>"><i class="bx bx-line-chart iconX"></i>
+                            <span class="title">Dashboard Financeiro</span>
+                            <span class="title-tooltip">Dashboard</span>
+                        </a>
+                    </li>
                     <li class="<?php if (isset($menuLancamentos)) {
                         echo 'active';
                     }; ?>">
                         <a class="tip-bottom" title="" href="<?= site_url('financeiro/lancamentos') ?>"><i class="bx bx-bar-chart-alt-2 iconX"></i>
                             <span class="title">Lançamentos</span>
                             <span class="title-tooltip">Lançamentos</span>
+                        </a>
+                    </li>
+                    <li class="<?php if (isset($menuCategorias)) {
+                        echo 'active';
+                    }; ?>">
+                        <a class="tip-bottom" title="" href="<?= site_url('categorias') ?>"><i class="bx bx-tag iconX"></i>
+                            <span class="title">Categorias</span>
+                            <span class="title-tooltip">Categorias</span>
+                        </a>
+                    </li>
+                    <li class="<?php if (isset($menuContas)) {
+                        echo 'active';
+                    }; ?>">
+                        <a class="tip-bottom" title="" href="<?= site_url('contas') ?>"><i class="bx bx-wallet iconX"></i>
+                            <span class="title">Contas</span>
+                            <span class="title-tooltip">Contas</span>
                         </a>
                     </li>
                 <?php } ?>

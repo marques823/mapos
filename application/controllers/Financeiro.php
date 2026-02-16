@@ -19,6 +19,25 @@ class Financeiro extends MY_Controller
         $this->lancamentos();
     }
 
+    public function dashboard()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vLancamento')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar o dashboard financeiro.');
+            redirect(base_url());
+        }
+
+        $this->data['dashboardData'] = $this->financeiro_model->getDashboardData();
+        $this->data['receitasDespesasMes'] = $this->financeiro_model->getReceitasDespesasMes();
+        $this->data['fluxoCaixa'] = $this->financeiro_model->getFluxoCaixa6Meses();
+        $this->data['contasAVencer'] = $this->financeiro_model->getContasAVencer();
+        $this->data['contasVencidas'] = $this->financeiro_model->getContasVencidas();
+        $this->data['menuLancamentos'] = 'financeiro';
+        $this->data['menuDashboard'] = 'financeiro';
+        $this->data['view'] = 'financeiro/dashboard';
+
+        return $this->layout();
+    }
+
     public function lancamentos()
     {
         if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vLancamento')) {
@@ -27,8 +46,11 @@ class Financeiro extends MY_Controller
         }
 
         $where = '';
-        $vencimento_de = $this->input->get('vencimento_de') ?: date('d/m/Y');
-        $vencimento_ate = $this->input->get('vencimento_ate') ?: date('d/m/Y');
+        // Definir período padrão como o mês atual se não houver filtros
+        $primeiroDiaMes = date('01/m/Y');
+        $ultimoDiaMes = date('t/m/Y');
+        $vencimento_de = $this->input->get('vencimento_de') ?: $primeiroDiaMes;
+        $vencimento_ate = $this->input->get('vencimento_ate') ?: $ultimoDiaMes;
         $cliente = $this->input->get('cliente');
         $tipo = $this->input->get('tipo');
         $status = $this->input->get('status');
@@ -127,33 +149,38 @@ class Financeiro extends MY_Controller
             } catch (Exception $e) {
                 $vencimento = date('Y/m/d');
             }
-            // Formatação correta dos valores
-            $valor = str_replace(',', '.', $this->input->post('valor'));
-            $valor_desconto = floatval(str_replace(',', '.', $this->input->post('valor_desconto')));   
-            $desconto = $valor_desconto;
-            $total_sem_desconto = $valor + $valor_desconto;
-            $valor = $total_sem_desconto;
-            $total_com_desconto = $valor - $valor_desconto;
-            $valor_desconto = $total_com_desconto;
-            // Verifica se o valor está em formato monetário
-            if (!is_numeric($valor_desconto)) {
-                $valor_desconto = str_replace([',', '.'], ['', ''], $valor_desconto);
+            // Formatação correta dos valores - Lógica simplificada
+            $valor = str_replace(['.', ','], ['', '.'], $this->input->post('valor'));
+            // Aceitar tanto 'desconto' quanto 'descontos' (compatibilidade)
+            $descontoInput = $this->input->post('desconto') ?: $this->input->post('descontos') ?: '0';
+            $desconto = str_replace(['.', ','], ['', '.'], $descontoInput);
+            
+            $valor = floatval($valor) ?: 0;
+            $desconto = floatval($desconto) ?: 0;
+            
+            // Valor final após desconto
+            $valor_desconto = $valor - $desconto;
+            if ($valor_desconto < 0) {
+                $valor_desconto = 0;
+                $desconto = $valor; // Limitar desconto ao valor máximo
             }
-            if (!is_numeric($valor)) {
-                $valor = str_replace([',', '.'], ['', ''], $valor);
+            
+            // Verifica se o valor está em formato monetário (fallback)
+            if (!is_numeric($valor_desconto)) {
+                $valor_desconto = floatval(str_replace([',', '.'], ['', '.'], $this->input->post('valor_desconto') ?: '0'));
             }
             // Criação do array de dados
             $data = [
                 'descricao' => set_value('descricao'),
-                'valor' => number_format($valor, 2, '.', ''), // Formatação para garantir 2 casas decimais
-                'valor_desconto' => number_format($valor_desconto, 2, '.', ''), // Formatação para garantir 2 casas decimais
-                'desconto' => $desconto,
+                'valor' => number_format($valor, 2, '.', ''), // Valor original
+                'valor_desconto' => number_format($valor_desconto, 2, '.', ''), // Valor final após desconto
+                'desconto' => number_format($desconto, 2, '.', ''), // Valor do desconto aplicado
                 'tipo_desconto' => 'real',
                 'data_vencimento' => $vencimento,
-                'data_pagamento' => $recebimento != null ? $recebimento : date('Y-m-d'),
-                'baixado' => $this->input->post('recebido') ?: 0,
+                'data_pagamento' => ($this->input->post('recebido') && $recebimento) ? $recebimento : null,
+                'baixado' => $this->input->post('recebido') ? 1 : 0,
                 'cliente_fornecedor' => set_value('cliente'),
-                'forma_pgto' => $this->input->post('formaPgto'),
+                'forma_pgto' => $this->input->post('formaPgto') ?: '',
                 'tipo' => set_value('tipo'),
                 'observacoes' => set_value('observacoes'),
                 'usuarios_id' => $this->session->userdata('id_admin'),
@@ -163,6 +190,13 @@ class Financeiro extends MY_Controller
             }
             if (set_value('idCliente')) {
                 $data['clientes_id'] = set_value('idCliente');
+            }
+            // Adicionar categoria e conta se selecionadas
+            if ($this->input->post('categoria')) {
+                $data['categorias_id'] = $this->input->post('categoria');
+            }
+            if ($this->input->post('conta')) {
+                $data['contas_id'] = $this->input->post('conta');
             }
             // Inserção dos dados no banco
             if ($this->financeiro_model->add('lancamentos', $data) == true) {
@@ -553,35 +587,65 @@ class Financeiro extends MY_Controller
             exit();
         }
 
-        // Começa a transação
-        $this->db->trans_start();
+        try {
+            // Começa a transação
+            $this->db->trans_begin();
 
-        // Atualiza a tabela vendas, removendo o ID do lançamento e alterando o faturado e status
-        $this->db->set('lancamentos_id', null);
-        $this->db->set('faturado', 0);
-        $this->db->set('status', 'Finalizado');
-        $this->db->where('lancamentos_id', $id);
-        $this->db->update('vendas');
-
-        // Exclui o lançamento
-        $result = $this->financeiro_model->delete('lancamentos', 'idLancamentos', $id);
-
-        if ($result) {
-            $this->db->trans_complete();
-
-            if ($this->db->trans_status() === FALSE) {
-                $this->db->trans_rollback();
-                $this->session->set_flashdata('error', 'Ocorreu um erro ao tentar excluir o lançamento.');
-                $json = ['result' => false, 'message' => 'Erro na transação'];
-            } else {
-                log_info('Excluiu um lançamento. ID: ' . $id);
-                $this->session->set_flashdata('success', 'Lançamento excluído com sucesso!');
-                $json = ['result' => true];
+            // Atualiza a tabela vendas, removendo o ID do lançamento e alterando o faturado e status
+            $this->db->set('lancamentos_id', null);
+            $this->db->set('faturado', 0);
+            $this->db->set('status', 'Finalizado');
+            $this->db->where('lancamentos_id', $id);
+            $this->db->update('vendas');
+            
+            if ($this->db->error()['code']) {
+                throw new Exception('Erro ao atualizar vendas: ' . $this->db->error()['message']);
             }
-        } else {
+
+            // Atualiza a tabela os, removendo o ID do lançamento
+            $this->db->set('lancamento', null);
+            $this->db->where('lancamento', $id);
+            $this->db->update('os');
+            
+            if ($this->db->error()['code']) {
+                throw new Exception('Erro ao atualizar OS: ' . $this->db->error()['message']);
+            }
+
+            // Excluir pagamentos parciais relacionados
+            $this->db->where('lancamentos_id', $id);
+            $this->db->delete('pagamentos_parciais');
+            
+            if ($this->db->error()['code']) {
+                throw new Exception('Erro ao excluir pagamentos parciais: ' . $this->db->error()['message']);
+            }
+
+            // Exclui o lançamento
+            $result = $this->financeiro_model->delete('lancamentos', 'idLancamentos', $id);
+            
+            if ($this->db->error()['code']) {
+                throw new Exception('Erro ao excluir lançamento: ' . $this->db->error()['message']);
+            }
+
+            if (!$result) {
+                throw new Exception('Método delete retornou false');
+            }
+
+            // Confirma a transação
+            $this->db->trans_commit();
+            
+            log_info('Excluiu um lançamento. ID: ' . $id);
+            $this->session->set_flashdata('success', 'Lançamento excluído com sucesso!');
+            $json = ['result' => true, 'message' => 'Lançamento excluído com sucesso!'];
+            
+        } catch (Exception $e) {
+            // Reverte a transação em caso de erro
             $this->db->trans_rollback();
+            
+            $errorMsg = 'Erro ao excluir lançamento: ' . $e->getMessage();
+            log_message('error', $errorMsg);
+            
             $this->session->set_flashdata('error', 'Ocorreu um erro ao tentar excluir o lançamento.');
-            $json = ['result' => false, 'message' => 'Erro ao excluir lançamento'];
+            $json = ['result' => false, 'message' => $errorMsg];
         }
 
         echo json_encode($json);
@@ -633,5 +697,282 @@ class Financeiro extends MY_Controller
         $ate = $ano . '-' . $mes . '-' . $qtdDiasMes;
 
         return [$inicia, $ate];
+    }
+
+    public function imprimirRecibo($id = null)
+    {
+        if (!$id || !is_numeric($id)) {
+            $this->session->set_flashdata('error', 'Lançamento não encontrado.');
+            redirect('financeiro');
+        }
+
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vLancamento')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar lançamentos.');
+            redirect(base_url());
+        }
+
+        $this->load->model('mapos_model');
+        $lancamento = $this->financeiro_model->getLancamentoById($id);
+
+        if (!$lancamento) {
+            $this->session->set_flashdata('error', 'Lançamento não encontrado.');
+            redirect('financeiro');
+        }
+
+        // Verificar se o lançamento está pago
+        if ($lancamento->baixado != 1) {
+            $this->session->set_flashdata('error', 'Apenas lançamentos pagos podem gerar recibo.');
+            redirect('financeiro');
+        }
+
+        // Opções de impressão
+        $opcoes = [
+            'mostrar_servicos' => $this->input->get('mostrar_servicos') !== '0',
+            'mostrar_preco_servicos' => $this->input->get('mostrar_preco_servicos') !== '0',
+            'mostrar_subtotais' => $this->input->get('mostrar_subtotais') !== '0',
+            'mostrar_detalhes_servicos' => $this->input->get('mostrar_detalhes_servicos') !== '0'
+        ];
+
+        // Buscar produtos e serviços relacionados (via OS ou Proposta)
+        $produtos = [];
+        $servicos = [];
+        $outros = [];
+        $tipoOrigem = null;
+        $idOrigem = null;
+
+        // Tentar encontrar OS relacionada
+        $this->load->model('os_model');
+        $os = $this->db->select('idOs')->where('lancamento', $id)->get('os')->row();
+        
+        if ($os) {
+            $tipoOrigem = 'os';
+            $idOrigem = $os->idOs;
+            $produtos = $this->os_model->getProdutos($os->idOs);
+            $servicos = $this->os_model->getServicos($os->idOs);
+            
+            // Buscar "outros produtos/serviços" da OS
+            $this->load->model('outros_produtos_servicos_os_model');
+            $outros = $this->outros_produtos_servicos_os_model->getByOs($os->idOs);
+        } else {
+            // Tentar encontrar Proposta relacionada
+            $this->load->model('propostas_model');
+            $proposta = $this->db->select('idProposta')->where('lancamento', $id)->get('propostas')->row();
+            
+            if ($proposta) {
+                $tipoOrigem = 'proposta';
+                $idOrigem = $proposta->idProposta;
+                $produtos = $this->propostas_model->getProdutos($proposta->idProposta);
+                $servicos = $this->propostas_model->getServicos($proposta->idProposta);
+                
+                // Buscar "outros produtos/serviços" da Proposta
+                $outros = $this->propostas_model->getOutros($proposta->idProposta);
+            }
+        }
+        
+        // Adicionar "outros" aos serviços (conforme solicitado)
+        if (!empty($outros)) {
+            foreach ($outros as $outro) {
+                // Criar objeto similar a serviço para manter compatibilidade
+                $servicoOutro = (object) [
+                    'nome' => $outro->descricao ?? 'Outro Item',
+                    'descricao' => $outro->descricao ?? 'Outro Item',
+                    'preco' => $outro->preco ?? 0,
+                    'quantidade' => 1,
+                    'detalhes' => null
+                ];
+                $servicos[] = $servicoOutro;
+            }
+        }
+
+        // Buscar pagamentos parciais
+        $this->load->model('pagamentos_parciais_model');
+        $pagamentos = $this->pagamentos_parciais_model->getByLancamento($id);
+
+        // Buscar chave PIX das configurações
+        $this->db->where('config', 'pix_key');
+        $configPix = $this->db->get('configuracoes')->row();
+        $pixKey = $configPix ? $configPix->valor : '';
+
+        $this->data['lancamento'] = $lancamento;
+        $this->data['emitente'] = $this->mapos_model->getEmitente();
+        $this->data['opcoes'] = $opcoes;
+        $this->data['produtos'] = $produtos;
+        $this->data['servicos'] = $servicos; // Já inclui os "outros" como serviços
+        $this->data['tipoOrigem'] = $tipoOrigem;
+        $this->data['idOrigem'] = $idOrigem;
+        $this->data['pagamentos'] = $pagamentos;
+        $this->data['pixKey'] = $pixKey;
+
+        // Calcular valor final (com desconto se houver)
+        $valorFinal = $lancamento->valor_desconto > 0 ? $lancamento->valor_desconto : $lancamento->valor;
+        $this->data['valorFinal'] = $valorFinal;
+
+        $this->load->view('financeiro/imprimirRecibo', $this->data);
+    }
+
+    /**
+     * Exibe detalhes do lançamento com histórico de pagamentos parciais
+     */
+    public function detalhes($id = null)
+    {
+        if (!$id || !is_numeric($id)) {
+            $this->session->set_flashdata('error', 'Lançamento não encontrado.');
+            redirect('financeiro');
+        }
+
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vLancamento')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar lançamentos.');
+            redirect(base_url());
+        }
+
+        $lancamento = $this->financeiro_model->getLancamentoById($id);
+
+        if (!$lancamento) {
+            $this->session->set_flashdata('error', 'Lançamento não encontrado.');
+            redirect('financeiro');
+        }
+
+        $this->load->model('pagamentos_parciais_model');
+        
+        // Calcular valores
+        $valorTotal = $lancamento->valor_desconto > 0 ? $lancamento->valor_desconto : $lancamento->valor;
+        $totalPago = $this->pagamentos_parciais_model->getTotalPago($id);
+        $saldoRestante = max(0, $valorTotal - $totalPago);
+        $percentualPago = $valorTotal > 0 ? min(100, round(($totalPago / $valorTotal) * 100, 2)) : 100;
+
+        $this->data['lancamento'] = $lancamento;
+        $this->data['pagamentos'] = $this->pagamentos_parciais_model->getByLancamento($id);
+        $this->data['valorTotal'] = $valorTotal;
+        $this->data['totalPago'] = $totalPago;
+        $this->data['saldoRestante'] = $saldoRestante;
+        $this->data['percentualPago'] = $percentualPago;
+        $this->data['view'] = 'financeiro/detalhes';
+
+        return $this->layout();
+    }
+
+    /**
+     * Adiciona um pagamento parcial via AJAX
+     */
+    public function adicionarPagamentoParcial()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'eLancamento')) {
+            echo json_encode(['result' => false, 'message' => 'Sem permissão']);
+            return;
+        }
+
+        $lancamentoId = $this->input->post('lancamento_id');
+        $valor = floatval(str_replace(',', '.', $this->input->post('valor')));
+        $dataPagamento = $this->input->post('data_pagamento');
+        $formaPgto = $this->input->post('forma_pgto');
+        $observacao = $this->input->post('observacao');
+
+        if (!$lancamentoId || $valor <= 0) {
+            echo json_encode(['result' => false, 'message' => 'Dados inválidos']);
+            return;
+        }
+
+        // Converter data
+        if ($dataPagamento) {
+            $dataParts = explode('/', $dataPagamento);
+            if (count($dataParts) == 3) {
+                $dataPagamento = $dataParts[2] . '-' . $dataParts[1] . '-' . $dataParts[0];
+            } else {
+                $dataPagamento = date('Y-m-d');
+            }
+        } else {
+            $dataPagamento = date('Y-m-d');
+        }
+
+        $this->load->model('pagamentos_parciais_model');
+
+        // Verificar saldo restante
+        $saldoRestante = $this->pagamentos_parciais_model->getSaldoRestante($lancamentoId);
+        if ($valor > $saldoRestante + 0.01) { // Margem para arredondamento
+            echo json_encode(['result' => false, 'message' => 'Valor maior que o saldo restante (R$ ' . number_format($saldoRestante, 2, ',', '.') . ')']);
+            return;
+        }
+
+        $data = [
+            'lancamentos_id' => $lancamentoId,
+            'valor' => $valor,
+            'data_pagamento' => $dataPagamento,
+            'forma_pgto' => $formaPgto,
+            'observacao' => $observacao,
+            'usuarios_id' => $this->session->userdata('id_admin')
+        ];
+
+        $result = $this->pagamentos_parciais_model->add($data);
+
+        if ($result) {
+            log_info('Adicionou pagamento parcial de R$ ' . number_format($valor, 2, ',', '.') . ' ao lançamento #' . $lancamentoId);
+            echo json_encode(['result' => true, 'message' => 'Pagamento registrado com sucesso!', 'id' => $result]);
+        } else {
+            echo json_encode(['result' => false, 'message' => 'Erro ao registrar pagamento']);
+        }
+    }
+
+    /**
+     * Exclui um pagamento parcial via AJAX
+     */
+    public function excluirPagamentoParcial()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'eLancamento')) {
+            echo json_encode(['result' => false, 'message' => 'Sem permissão']);
+            return;
+        }
+
+        $id = $this->input->post('id');
+
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['result' => false, 'message' => 'ID inválido']);
+            return;
+        }
+
+        $this->load->model('pagamentos_parciais_model');
+        $result = $this->pagamentos_parciais_model->delete($id);
+
+        if ($result) {
+            log_info('Excluiu pagamento parcial #' . $id);
+            echo json_encode(['result' => true, 'message' => 'Pagamento excluído com sucesso!']);
+        } else {
+            echo json_encode(['result' => false, 'message' => 'Erro ao excluir pagamento']);
+        }
+    }
+
+    /**
+     * Retorna dados do lançamento para AJAX
+     */
+    public function getLancamentoJson($id)
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vLancamento')) {
+            echo json_encode(['result' => false, 'message' => 'Sem permissão']);
+            return;
+        }
+
+        $lancamento = $this->financeiro_model->getLancamentoById($id);
+
+        if (!$lancamento) {
+            echo json_encode(['result' => false, 'message' => 'Lançamento não encontrado']);
+            return;
+        }
+
+        $this->load->model('pagamentos_parciais_model');
+        
+        $valorTotal = $lancamento->valor_desconto > 0 ? $lancamento->valor_desconto : $lancamento->valor;
+        $totalPago = $this->pagamentos_parciais_model->getTotalPago($id);
+        $saldoRestante = max(0, $valorTotal - $totalPago);
+        $percentualPago = $valorTotal > 0 ? min(100, round(($totalPago / $valorTotal) * 100, 2)) : 100;
+        $pagamentos = $this->pagamentos_parciais_model->getByLancamento($id);
+
+        echo json_encode([
+            'result' => true,
+            'lancamento' => $lancamento,
+            'valorTotal' => $valorTotal,
+            'totalPago' => $totalPago,
+            'saldoRestante' => $saldoRestante,
+            'percentualPago' => $percentualPago,
+            'pagamentos' => $pagamentos
+        ]);
     }
 }

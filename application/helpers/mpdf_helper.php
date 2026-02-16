@@ -6,7 +6,7 @@ if (! defined('BASEPATH')) {
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-function pdf_create($html, $filename, $stream = true, $landscape = false)
+function pdf_create($html, $filename, $stream = true, $landscape = false, $download = false)
 {
     // Garantir que o diretório temporário existe e tem permissões corretas
     $tempDir = FCPATH . 'assets/uploads/temp';
@@ -16,6 +16,10 @@ function pdf_create($html, $filename, $stream = true, $landscape = false)
     if (!is_dir($tempDir . '/mpdf')) {
         @mkdir($tempDir . '/mpdf', 0777, true);
     }
+    
+    // Garantir permissões de escrita
+    @chmod($tempDir, 0777);
+    @chmod($tempDir . '/mpdf', 0777);
     
     // Normalizar o caminho (remover barras duplas)
     $tempDir = rtrim($tempDir, '/') . '/';
@@ -30,7 +34,9 @@ function pdf_create($html, $filename, $stream = true, $landscape = false)
     $mpdf->WriteHTML($html);
 
     if ($stream) {
-        $mpdf->Output($filename . '.pdf', 'I');
+        // 'D' = Download, 'I' = Inline (abre no navegador)
+        $dest = $download ? 'D' : 'I';
+        $mpdf->Output($filename . '.pdf', $dest);
     } else {
         $mpdf->Output($tempDir . $filename . '.pdf', 'F');
 
