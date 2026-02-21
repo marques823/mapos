@@ -4,10 +4,10 @@
 		"cURL",
 		"MySQLi",
 		"GD",
-    "zip"
+		"zip"
 	],
-  "database_file": "../banco.sql",
-  "writeable_directories": {
-    "files": "/updates"
-  }
+	"database_file": "../banco.sql",
+	"writeable_directories": {
+		"files": "/updates"
+	}
 }

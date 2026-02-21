@@ -57,7 +57,7 @@ if (! empty($_POST)) {
      * check the db config file
      * if db already configured, we'll assume that the installation has completed
      */
-    $env_path = '..' . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env';
+    $env_path = '..' . DIRECTORY_SEPARATOR . '.env';
     $is_installed = file_exists($env_path) && strpos(file_get_contents($env_path), 'APP_ENVIRONMENT="pre_installation"') === false;
 
     if ($is_installed) {
@@ -82,29 +82,37 @@ if (! empty($_POST)) {
     $mysqli->close();
     // database created
 
-    $env_file_path = '..' . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env.example';
-    $env_file = file_get_contents($env_file_path);
+    $env_example_path = '..' . DIRECTORY_SEPARATOR . '.env.example';
+    $env_content = file_get_contents($env_example_path);
+
+    // Se o .env atual existe, vamos tentar preservar as variáveis de Docker (NGINX_PORT, etc)
+    if (file_exists($env_path)) {
+        $current_env = file_get_contents($env_path);
+        // Regex simples para capturar blocos de Docker se existirem
+        if (preg_match('/# --- DOCKER CONFIGURATION ---.*?(?=# ---)/s', $current_env, $matches)) {
+            $env_content = preg_replace('/# --- DOCKER CONFIGURATION ---.*?(?=# ---)/s', $matches[0], $env_content);
+        }
+    }
 
     // set the database config file
-    $env_file = str_replace('enter_db_hostname', $host, $env_file);
-    $env_file = str_replace('enter_db_username', $dbuser, $env_file);
-    $env_file = str_replace('enter_db_password', $dbpassword, $env_file);
-    $env_file = str_replace('enter_db_name', $dbname, $env_file);
+    $env_content = str_replace('mysql', $host, $env_content); // HOST
+    $env_content = str_replace('mapos', $dbuser, $env_content); // USER (cuidado aqui, pode trocar mais de uma ocorrencia)
+    // Para ser mais preciso com o replace do .env.example que unificamos:
+    $env_content = str_replace('DB_HOSTNAME=mysql', "DB_HOSTNAME=$host", $env_content);
+    $env_content = str_replace('DB_USERNAME=mapos', "DB_USERNAME=$dbuser", $env_content);
+    $env_content = str_replace('DB_PASSWORD=mapos', "DB_PASSWORD=$dbpassword", $env_content);
+    $env_content = str_replace('DB_DATABASE=mapos', "DB_DATABASE=$dbname", $env_content);
 
-    // set random enter_encryption_key
+    // set random keys
     $encryption_key = substr(md5(rand()), 0, 15);
-    $env_file = str_replace('enter_encryption_key', $encryption_key, $env_file);
-    $env_file = str_replace('enter_baseurl', $base_url, $env_file);
-
-    // set random enter_jwt_key
-    $env_file = str_replace('enter_jwt_key', base64_encode(openssl_random_pseudo_bytes(32)), $env_file);
-    $env_file = str_replace('enter_token_expire_time', $_POST['enter_token_expire_time'], $env_file);
-    $env_file = str_replace('enter_api_enabled', (string) $_POST['enter_api_enabled'], $env_file);
+    $env_content = str_replace('42a77a02eeb3c69', $encryption_key, $env_content);
+    $env_content = str_replace('http://localhost:8000', $base_url, $env_content);
+    $env_content = str_replace('boKehm6L8e4hhsBDz2ub49ZJN6//HAx6CCaASNKrRhU=', base64_encode(openssl_random_pseudo_bytes(32)), $env_content);
 
     // set the environment = production
-    $env_file = str_replace('pre_installation', 'production', $env_file);
+    $env_content = str_replace('pre_installation', 'production', $env_content);
 
-    if (file_put_contents('..' . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env', $env_file)) {
+    if (file_put_contents($env_path, $env_content)) {
         echo json_encode(['success' => true, 'message' => 'Instalação bem sucedida.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Erro ao criar arquivo env.']);
