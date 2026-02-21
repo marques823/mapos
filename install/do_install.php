@@ -65,6 +65,17 @@ if (! empty($_POST)) {
         exit();
     }
 
+    // Antes de começar, garante que podemos escrever no .env
+    if (file_exists($env_path) && !is_writable($env_path)) {
+        echo json_encode(['success' => false, 'message' => 'O arquivo .env na raiz não tem permissão de escrita. Execute: sudo chmod 666 .env ou sudo chown 1000:1000 .env']);
+        exit();
+    }
+
+    if (!file_exists($env_path) && !is_writable(dirname($env_path))) {
+        echo json_encode(['success' => false, 'message' => 'A pasta raiz não tem permissão de escrita para criar o arquivo .env.']);
+        exit();
+    }
+
     //start installation
     $sql = file_get_contents($settings['database_file']);
 
@@ -76,13 +87,28 @@ if (! empty($_POST)) {
     $sql = str_replace('admin_created_at', $now, $sql);
 
     //create tables in datbase
-    $mysqli->multi_query($sql);
+    if (!$mysqli->multi_query($sql)) {
+         echo json_encode(['success' => false, 'message' => 'Erro ao executar multi_query: ' . $mysqli->error]);
+         exit();
+    }
+    
     do {
     } while (mysqli_more_results($mysqli) && mysqli_next_result($mysqli));
+    
+    if ($mysqli->error) {
+        echo json_encode(['success' => false, 'message' => 'Erro durante a importação do SQL: ' . $mysqli->error]);
+        exit();
+    }
+    
     $mysqli->close();
     // database created
 
     $env_example_path = '..' . DIRECTORY_SEPARATOR . '.env.example';
+    if (!file_exists($env_example_path)) {
+        echo json_encode(['success' => false, 'message' => 'Arquivo .env.example não encontrado na raiz.']);
+        exit();
+    }
+    
     $env_content = file_get_contents($env_example_path);
 
     // Se o .env atual existe, vamos tentar preservar as variáveis de Docker (NGINX_PORT, etc)
@@ -95,8 +121,6 @@ if (! empty($_POST)) {
     }
 
     // set the database config file
-    $env_content = str_replace('mysql', $host, $env_content); // HOST
-    $env_content = str_replace('mapos', $dbuser, $env_content); // USER (cuidado aqui, pode trocar mais de uma ocorrencia)
     // Para ser mais preciso com o replace do .env.example que unificamos:
     $env_content = str_replace('DB_HOSTNAME=mysql', "DB_HOSTNAME=$host", $env_content);
     $env_content = str_replace('DB_USERNAME=mapos', "DB_USERNAME=$dbuser", $env_content);
@@ -115,7 +139,7 @@ if (! empty($_POST)) {
     if (file_put_contents($env_path, $env_content)) {
         echo json_encode(['success' => true, 'message' => 'Instalação bem sucedida.']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao criar arquivo env.']);
+        echo json_encode(['success' => false, 'message' => 'Erro ao gravar o arquivo .env.']);
     }
 
     exit();
