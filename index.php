@@ -62,10 +62,18 @@ if (file_exists($composerAutoloadFile)) {
     throw new \Exception('Arquivo autoload não encontrado, necessário executar composer install!');
 }
 
-$envFileArr = [
-    __DIR__ . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env',
-    __DIR__ . DIRECTORY_SEPARATOR . '.env'
-];
+// Detectar se está rodando em Docker
+$isDocker = file_exists('/.dockerenv') || getenv('DOCKER_CONTAINER') || isset($_ENV['DOCKER_CONTAINER']);
+
+$envFileArr = [];
+if ($isDocker) {
+    // No Docker, priorizamos o .env da raiz ou variáveis passadas pelo docker-compose
+    $envFileArr[] = __DIR__ . DIRECTORY_SEPARATOR . '.env';
+} else {
+    // No XAMPP/Local, priorizamos o application/.env
+    $envFileArr[] = __DIR__ . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env';
+    $envFileArr[] = __DIR__ . DIRECTORY_SEPARATOR . '.env';
+}
 
 foreach ($envFileArr as $envFile) {
     if (file_exists($envFile) && file_exists($composerAutoloadFile)) {
@@ -73,7 +81,10 @@ foreach ($envFileArr as $envFile) {
         $envFileName = basename($envFile);
         $dotenv = Dotenv\Dotenv::createImmutable($envFilePath, $envFileName);
         $dotenv->load();
-        break;
+        // Se carregarmos o modo produção de um arquivo válido, paramos aqui
+        if (isset($_ENV['APP_ENVIRONMENT']) && $_ENV['APP_ENVIRONMENT'] === 'production') {
+            break;
+        }
     }
 }
 
