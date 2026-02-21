@@ -15,14 +15,15 @@ git clone <url-do-repositorio> mapos
 cd mapos
 ```
 
-2. Configure as variáveis de ambiente:
+2. Configure as variáveis de ambiente do Docker:
 ```bash
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
+cp docker/.env.example docker/.env
+# Edite docker/.env se necessário (portas, senhas, etc.)
 ```
 
-3. Suba os containers:
+3. Suba os containers (de dentro da pasta `docker/`):
 ```bash
+cd docker
 docker-compose up -d
 ```
 
@@ -32,14 +33,16 @@ docker-compose run --rm composer install --ignore-platform-reqs --no-scripts
 ```
 
 5. Acesse o sistema:
-   - **Aplicação**: `http://localhost:8080`
-   - **phpMyAdmin**: `http://localhost:8888`
+   - **Aplicação**: `http://localhost:8000`
+   - **phpMyAdmin**: `http://localhost:8080`
 
 6. No primeiro acesso, o instalador será exibido automaticamente. Siga as instruções na tela.
 
 ### Instalação de Módulos (Docker)
 
 Após a instalação base, acesse `install_modulos_docker.php` para instalar módulos adicionais como Propostas Comerciais.
+
+> **Nota:** O arquivo `docker/.env` é **local** e não é rastreado pelo git. Use `docker/.env.example` como referência. Isso permite rodar o Docker e o XAMPP/LAMP ao mesmo tempo sem conflitos de portas.
 
 ---
 
@@ -72,11 +75,16 @@ Para instalação automatizada:
 mapos/
 ├── application/        # Código fonte (CodeIgniter)
 ├── assets/             # CSS, JS, imagens
-├── docker/             # Configurações Docker (Nginx, PHP, Composer)
+├── docker/             # Configurações Docker (isolado)
+│   ├── docker-compose.yml
+│   ├── .env.example    # Template de variáveis (no git)
+│   ├── .env            # Variáveis locais (não rastreado)
+│   ├── application_env_docker  # .env da aplicação para Docker
+│   ├── data/           # Dados MySQL (não rastreado)
+│   └── etc/            # Nginx, PHP, Composer configs
 ├── install/            # Instalador web
 ├── updates/            # Scripts SQL de atualização
 ├── banco.sql           # Schema inicial do banco
-├── docker-compose.yml  # Configuração Docker Compose
 ├── install.sh          # Script de instalação Linux
 ├── install.bat         # Script de instalação Windows
 └── composer.json       # Dependências PHP

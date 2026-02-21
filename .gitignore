@@ -2,15 +2,12 @@
 /vendor/
 /application/vendor/
 
-# Docker data
+# Docker - local only
 /docker/data/
+/docker/.env
 
-# Environment files
+# Environment files (local)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 application/.env
 
 # IDE
