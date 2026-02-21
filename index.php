@@ -62,11 +62,19 @@ if (file_exists($composerAutoloadFile)) {
     throw new \Exception('Arquivo autoload não encontrado, necessário executar composer install!');
 }
 
-$envFile = __DIR__ . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env';
-if (file_exists($envFile) && file_exists($composerAutoloadFile)) {
-    $envFilePath = __DIR__ . DIRECTORY_SEPARATOR . 'application';
-    $dotenv = Dotenv\Dotenv::createImmutable($envFilePath);
-    $dotenv->load();
+$envFileArr = [
+    __DIR__ . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env',
+    __DIR__ . DIRECTORY_SEPARATOR . '.env'
+];
+
+foreach ($envFileArr as $envFile) {
+    if (file_exists($envFile) && file_exists($composerAutoloadFile)) {
+        $envFilePath = dirname($envFile);
+        $envFileName = basename($envFile);
+        $dotenv = Dotenv\Dotenv::createImmutable($envFilePath, $envFileName);
+        $dotenv->load();
+        break;
+    }
 }
 
 //set the environment to production after installation
