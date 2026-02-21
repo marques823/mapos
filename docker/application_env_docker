@@ -6,7 +6,6 @@ APP_CHARSET=UTF-8
 APP_ENCRYPTION_KEY="42a77a02eeb3c69"
 APP_ENVIRONMENT="production"
 
-# Sessão em arquivos evita erro na instalação (quando o banco ainda não tem a tabela ci_sessions)
 APP_SESS_DRIVER=files
 APP_SESS_COOKIE_NAME=MAPOS_SESSION
 APP_SESS_EXPIRATION=7200
