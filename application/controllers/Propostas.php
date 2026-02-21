@@ -1025,7 +1025,7 @@ class Propostas extends MY_Controller
             die('Sem permissão');
         }
         
-        $sql = file_get_contents(FCPATH . 'updates/add_estoque_consumido_propostas.sql');
+        $sql = file_get_contents(FCPATH . 'install/sql/add_estoque_consumido_propostas.sql');
         $commands = explode(';', $sql);
         
         foreach ($commands as $command) {
