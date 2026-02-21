@@ -2,12 +2,15 @@
 /vendor/
 /application/vendor/
 
-# Docker - local only
+# Docker data
 /docker/data/
-/docker/.env
 
-# Environment files (local)
+# Environment files
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 application/.env
 
 # IDE
@@ -16,21 +19,12 @@ application/.env
 
 # OS files
 .DS_Store
-desktop.ini
+Thumbs.db
 
-# Application generated files
-application/logs/*
-ci_sessions/
-uploads/
-assets/userImage/
-assets/certificados/
-
-# Install generated files
-/install/files/
-
-# Cache
-.php_cs.cache
-.php-cs-fixer.cache
-
-# Agent/AI files
-.gemini/
+# Map-OS specific
+/assets/userImage/
+/assets/certificados/
+/uploads/
+/ci_sessions/
+/application/logs/*
+!/application/logs/index.html
