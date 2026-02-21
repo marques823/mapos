@@ -280,6 +280,7 @@ class Mine extends CI_Controller
         $data['menuPainel'] = 'painel';
         $data['compras'] = $this->Conecte_model->getLastCompras($this->session->userdata('cliente_id'));
         $data['os'] = $this->Conecte_model->getLastOs($this->session->userdata('cliente_id'));
+        $data['propostas'] = $this->Conecte_model->getLastPropostas($this->session->userdata('cliente_id'));
         $data['output'] = 'conecte/painel';
         $this->load->view('conecte/template', $data);
     }
@@ -523,6 +524,97 @@ class Mine extends CI_Controller
 
         $data['output'] = 'conecte/os';
         $this->load->view('conecte/template', $data);
+    }
+
+    public function propostas()
+    {
+        if (! session_id() || ! $this->session->userdata('conectado')) {
+            redirect('mine');
+        }
+
+        $data['menuPropostas'] = 'propostas';
+        $this->load->library('pagination');
+
+        $config['base_url'] = base_url() . 'index.php/mine/propostas/';
+        $config['total_rows'] = $this->Conecte_model->count('propostas', $this->session->userdata('cliente_id'));
+        $config['per_page'] = 10;
+        $config['next_link'] = 'Próxima';
+        $config['prev_link'] = 'Anterior';
+        $config['full_tag_open'] = '<div class="pagination alternate"><ul>';
+        $config['full_tag_close'] = '</ul></div>';
+        $config['num_tag_open'] = '<li>';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li><a style="color: #2D335B"><b>';
+        $config['cur_tag_close'] = '</b></a></li>';
+        $config['prev_tag_open'] = '<li>';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li>';
+        $config['next_tag_close'] = '</li>';
+        $config['first_link'] = 'Primeira';
+        $config['last_link'] = 'Última';
+        $config['first_tag_open'] = '<li>';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li>';
+        $config['last_tag_close'] = '</li>';
+
+        $this->pagination->initialize($config);
+
+        $data['results'] = $this->Conecte_model->getPropostas('propostas', '*', '', $config['per_page'], $this->uri->segment(3), '', '', $this->session->userdata('cliente_id'));
+
+        $data['output'] = 'conecte/propostas';
+        $this->load->view('conecte/template', $data);
+    }
+
+    public function visualizarProposta($id = null)
+    {
+        if (! session_id() || ! $this->session->userdata('conectado')) {
+            redirect('mine');
+        }
+
+        $data['menuPropostas'] = 'propostas';
+        $this->load->model('mapos_model');
+        $this->load->model('propostas_model');
+
+        $data['result'] = $this->Conecte_model->getPropostaById($this->uri->segment(3));
+
+        if (!$data['result'] || $data['result']->clientes_id != $this->session->userdata('cliente_id')) {
+            $this->session->set_flashdata('error', 'Esta proposta não pertence ao cliente logado.');
+            redirect('mine/painel');
+        }
+
+        $data['produtos'] = $this->propostas_model->getProdutos($this->uri->segment(3));
+        $data['servicos'] = $this->propostas_model->getServicos($this->uri->segment(3));
+        $data['parcelas'] = $this->propostas_model->getParcelas($this->uri->segment(3));
+        $data['outros'] = $this->propostas_model->getOutros($this->uri->segment(3));
+        $data['emitente'] = $this->mapos_model->getEmitente();
+
+        $data['output'] = 'conecte/visualizar_proposta';
+        $this->load->view('conecte/template', $data);
+    }
+
+    public function imprimirProposta($id = null)
+    {
+        if (! session_id() || ! $this->session->userdata('conectado')) {
+            redirect('mine');
+        }
+
+        $this->load->model('mapos_model');
+        $this->load->model('propostas_model');
+
+        $data['result'] = $this->Conecte_model->getPropostaById($this->uri->segment(3));
+
+        if (!$data['result'] || $data['result']->clientes_id != $this->session->userdata('cliente_id')) {
+            $this->session->set_flashdata('error', 'Esta proposta não pertence ao cliente logado.');
+            redirect('mine/painel');
+        }
+
+        $data['produtos'] = $this->propostas_model->getProdutos($this->uri->segment(3));
+        $data['servicos'] = $this->propostas_model->getServicos($this->uri->segment(3));
+        $data['parcelas'] = $this->propostas_model->getParcelas($this->uri->segment(3));
+        $data['outros'] = $this->propostas_model->getOutros($this->uri->segment(3));
+        $data['emitente'] = $this->mapos_model->getEmitente();
+
+        $this->load->view('propostas/imprimirProposta', $data);
     }
 
     public function visualizarOs($id = null)

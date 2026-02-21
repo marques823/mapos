@@ -143,6 +143,50 @@ class Conecte_model extends CI_Model
         return false;
     }
 
+    public function getPropostas($table, $fields, $where, $perpage, $start, $one, $array, $cliente)
+    {
+        $this->db->select($fields . ', COALESCE(clientes.nomeCliente, propostas.cliente_nome) as nomeCliente, usuarios.nome');
+        $this->db->from($table);
+        $this->db->join('clientes', 'clientes.idClientes = propostas.clientes_id', 'left');
+        $this->db->join('usuarios', 'usuarios.idUsuarios = propostas.usuarios_id', 'left');
+        $this->db->where('clientes_id', $cliente);
+        $this->db->limit($perpage, $start);
+        $this->db->order_by('idProposta', 'desc');
+        if ($where) {
+            $this->db->where($where);
+        }
+
+        $query = $this->db->get();
+
+        $result = ! $one ? $query->result() : $query->row();
+
+        return $result;
+    }
+
+    public function getPropostaById($id)
+    {
+        $this->db->select('propostas.*, clientes.nomeCliente, clientes.documento, clientes.rua, clientes.numero, clientes.bairro, clientes.cidade, clientes.estado, clientes.cep, clientes.email, clientes.celular as celular_cliente, usuarios.nome, usuarios.telefone as telefone_usuario, usuarios.email as email_usuario');
+        $this->db->from('propostas');
+        $this->db->join('clientes', 'propostas.clientes_id = clientes.idClientes');
+        $this->db->join('usuarios', 'propostas.usuarios_id = usuarios.idUsuarios');
+        $this->db->where('propostas.idProposta', $id);
+        $this->db->limit(1);
+
+        return $this->db->get()->row();
+    }
+
+    public function getLastPropostas($cliente)
+    {
+        $this->db->select('propostas.*, usuarios.nome');
+        $this->db->from('propostas');
+        $this->db->join('usuarios', 'propostas.usuarios_id = usuarios.idUsuarios', 'left');
+        $this->db->where('clientes_id', $cliente);
+        $this->db->limit(10);
+        $this->db->order_by('idProposta', 'desc');
+
+        return $this->db->get()->result();
+    }
+
     public function getQrCode($id, $pixKey, $emitente)
     {
         if (empty($id) || empty($pixKey) || empty($emitente)) {

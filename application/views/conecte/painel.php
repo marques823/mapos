@@ -33,6 +33,16 @@
             </a>
         </li>
         <li class="card">
+            <a href="<?php echo base_url() ?>index.php/mine/propostas">
+                <div class="lord-icon04">
+                    <i class='bx bx-file iconBx04'></i>
+                </div>
+            </a>
+            <a href="<?php echo base_url() ?>index.php/mine/propostas">
+                <div style="font-size: 1.2em" class="numbers">Propostas</div>
+            </a>
+        </li>
+        <li class="card">
             <a href="<?php echo base_url() ?>index.php/mine/conta">
                 <div class="lord-icon07">
                     <i class='bx bx-user-circle iconBx07'></i></span>
@@ -137,10 +147,73 @@
                             echo '</tr>';
                         }
                     } else {
-                        echo '<tr><td colspan="3">Nenhum ordem de serviço encontrada.</td></tr>';
+                        echo '<tr><td colspan="7">Nenhum ordem de serviço encontrada.</td></tr>';
                     }
 
             ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="widget-box">
+        <div class="widget-title" style="margin: -20px 0 0">
+            <span class="icon"><i class="fas fa-signal"></i></span>
+            <h5>Últimas Propostas</h5>
+        </div>
+        <div class="widget-content">
+            <table id="tabela" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nº</th>
+                        <th>Responsável</th>
+                        <th>Data</th>
+                        <th>Validade</th>
+                        <th>Valor Total</th>
+                        <th>Status</th>
+                        <th style="text-align:right">Visualizar / Imprimir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($propostas != null) {
+                        foreach ($propostas as $p) {
+                            switch ($p->status) {
+                                case 'Aprovada':
+                                case 'Concluído':
+                                    $cor = '#256';
+                                    break;
+                                case 'Em aberto':
+                                    $cor = '#17a2b8';
+                                    break;
+                                case 'Pendente':
+                                    $cor = '#ffc107';
+                                    break;
+                                case 'Não aprovada':
+                                    $cor = '#dc3545';
+                                    break;
+                                default:
+                                    $cor = '#6c757d';
+                                    break;
+                            }
+
+                            echo '<tr>';
+                            echo '<td>' . ($p->numero_proposta ?: $p->idProposta) . '</td>';
+                            echo '<td>' . $p->nome . '</td>';
+                            echo '<td>' . date('d/m/Y', strtotime($p->data_proposta)) . '</td>';
+                            echo '<td>' . ($p->data_validade ? date('d/m/Y', strtotime($p->data_validade)) : '-') . '</td>';
+                            echo '<td>R$ ' . number_format($p->valor_total, 2, ',', '.') . '</td>';
+                            echo '<td><span class="badge" style="background-color: ' . $cor . '; border-color: ' . $cor . '">' . $p->status . '</span> </td>';
+                            echo '<td style="text-align:right">';
+                            echo '<a href="' . base_url() . 'index.php/mine/visualizarProposta/' . $p->idProposta . '" class="btn"> <i class="fas fa-eye" ></i></a> ';
+                            echo '<a href="' . base_url() . 'index.php/mine/imprimirProposta/' . $p->idProposta . '" class="btn" target="_blank"> <i class="fas fa-print"></i></a>';
+                            echo '</td>';
+                            echo '</tr>';
+                        }
+                    } else {
+                        echo '<tr><td colspan="7">Nenhuma proposta encontrada.</td></tr>';
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
