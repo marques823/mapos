@@ -1,33 +1,39 @@
-# See https://help.github.com/ignore-files/ for more about ignoring files.
-# production
-/install/files
-/docker/data
-
-# misc
-.DS_Store
-.vscode
-
+# Dependencies
 /vendor/
 /application/vendor/
 
+# Docker data
+/docker/data/
+
+# Environment files
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+application/.env
 
-!blank/.gitkeep
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
 desktop.ini
 
-application/vendor/
-vendor/
-.idea/
-.php_cs.cache
-.php-cs-fixer.cache
+# Application generated files
 application/logs/*
 ci_sessions/
-
-uploads
-application/.env
-assets/userImage
+uploads/
+assets/userImage/
 assets/certificados/
-.env
+
+# Install generated files
+/install/files/
+
+# Cache
+.php_cs.cache
+.php-cs-fixer.cache
+
+# Agent/AI files
+.gemini/
