@@ -62,23 +62,22 @@ if (file_exists($composerAutoloadFile)) {
     throw new \Exception('Arquivo autoload não encontrado, necessário executar composer install!');
 }
 
-$envFileArr = [
-    __DIR__ . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env',
-    __DIR__ . DIRECTORY_SEPARATOR . '.env'
-];
+$envFile = __DIR__ . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . '.env';
+$envFilePath = __DIR__ . DIRECTORY_SEPARATOR . 'application';
 
-foreach ($envFileArr as $envFile) {
-    if (file_exists($envFile) && file_exists($composerAutoloadFile)) {
-        $envFilePath = dirname($envFile);
-        $envFileName = basename($envFile);
-        $dotenv = Dotenv\Dotenv::createImmutable($envFilePath, $envFileName);
-        $dotenv->load();
-        break;
-    }
+if (!file_exists($envFile)) {
+    $envFile = __DIR__ . DIRECTORY_SEPARATOR . '.env';
+    $envFilePath = __DIR__;
+}
+
+if (file_exists($envFile) && file_exists($composerAutoloadFile)) {
+    $dotenv = Dotenv\Dotenv::createImmutable($envFilePath);
+    $dotenv->load();
 }
 
 //set the environment to production after installation
-define('ENVIRONMENT', $_ENV['APP_ENVIRONMENT'] ?? 'pre_installation');
+// Using getenv() as fallback for $_ENV which might not be populated in some XAMPP setups
+define('ENVIRONMENT', $_ENV['APP_ENVIRONMENT'] ?? getenv('APP_ENVIRONMENT') ?? 'pre_installation');
 
 // we don't want to access the main project before installation. redirect to installation page
 if (ENVIRONMENT === 'pre_installation') {
