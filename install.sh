@@ -156,7 +156,7 @@ fi
         mv -i $dirHtdocs/*mapos* $dirHtdocs/mapos
         echo
         echo "* Atribuindo permissões."
-        sudo chmod 777 $dirHtdocs/mapos/install/sql/
+        sudo chmod 777 $dirHtdocs/mapos/updates/
         sudo chmod 777 $dirHtdocs/mapos/application/
         sudo chmod 777 $dirHtdocs/mapos/index.php
         sudo chmod 777 $dirHtdocs/mapos/application/config/config.php

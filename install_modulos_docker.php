@@ -89,11 +89,11 @@ function runSqlFile($mysqli, $filepath) {
 
 // 4. Run SQL updates
 $updates = [
-    'install/sql/create_propostas.sql',
-    'install/sql/add_estoque_consumido_propostas.sql',
-    'install/sql/add_lancamento_propostas.sql',
-    'install/sql/add_campos_condicoes_propostas.sql',
-    'install/sql/update_propostas_cliente_nome.sql'
+    'updates/create_propostas.sql',
+    'updates/add_estoque_consumido_propostas.sql',
+    'updates/add_lancamento_propostas.sql',
+    'updates/add_campos_condicoes_propostas.sql',
+    'updates/update_propostas_cliente_nome.sql'
 ];
 
 foreach ($updates as $file) {

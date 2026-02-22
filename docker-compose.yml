@@ -1,4 +1,3 @@
-version: '3.9'
 
 services:
   nginx:
@@ -24,11 +23,12 @@ services:
       context: ./docker/etc/php
       dockerfile: Dockerfile
     restart: always
+    env_file:
+      - ".env"
     volumes:
       - "./docker/etc/php/php.ini:/usr/local/etc/php/conf.d/php.ini"
       - "./docker/etc/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini"
       - "./:/var/www/html"
-      - "./docker/app.env:/var/www/html/application/.env"
     environment:
       - DB_HOSTNAME=${MYSQL_MAPOS_HOST}
       - DB_USERNAME=${MYSQL_MAPOS_USER}
